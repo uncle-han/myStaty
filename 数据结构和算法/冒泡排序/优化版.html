@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <script>
+        console.time('a')
+        const arr = [10,7,1,4,0,5,8,2,9,3]
+        var counts = 0
+        const len = arr.length
+        for(var i = 0; i < len - 1; i++) { // 减1的理由是因为最后一次不用做对比，前一次已经交换了，就已经确定了最大的数，第二层循环的减也是一样的道理
+            for(var j = i + 1; j < len - 1 - i; j++) { // 减i是因为，之前已经排好了i项了，做无用工
+                counts++
+                if(arr[i] > arr[j]) {
+                    const Item = arr[j]
+                    arr[j] = arr[i]
+                    arr[i] = Item
+                }
+            }
+        }
+        console.timeEnd('a')
+        console.log(arr)
+        console.log('counts: ', counts)
+    </script>
+</body>
+</html>

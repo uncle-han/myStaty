@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <script>
+        /*
+            优化的点：
+            1. 用闭包保存install的变量
+            2. new 关键字调用函数
+        */
+
+        const Persion = (function(){
+            let instance = null
+            function Persion(name) {
+                this.name = name
+            }
+
+            return function(...args) {
+                if(!instance) {
+                    instance = new Persion(...args)
+                }
+                return instance
+            }
+        })()
+
+        const p1 = new Persion('xiaoxiao')
+        const p2 = new Persion('qqh') // 代码执行了，但没有改变单体实例的属性
+        console.log(p1, p2);
+        console.log(p1 === p2) // output ==> true
+    </script>
+</body>
+</html>

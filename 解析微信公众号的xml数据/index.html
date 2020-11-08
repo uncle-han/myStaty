@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <script>
+        const reg = /<([A-Za-z]+)>([0-9]+|<\!\[CDATA\[[\s\S]+\]\]>)<\/\1>/g
+        const xml = `<xml>
+                        <ToUserName><![CDATA[gh_c38acee90220]]></ToUserName>
+                        <FromUserName><![CDATA[onsMh6HGE-VZQ3NdsD26IgbLY7UA]]></FromUserName>
+                        <CreateTime>1604328746</CreateTime>
+                        <MsgType><![CDATA[text]]></MsgType>
+                        <Content><![CDATA[111111111]]></Content>
+                        <MsgId>22968464493234668</MsgId>
+                    </xml>`
+                    const arr = xml.match(reg)
+                    const getContenReg = /<([A-Za-z]+)>(([0-9]+)|<\!\[CDATA\[([\s\S]+)\]\]>)<\/\1>/
+                    console.log(arr);
+                    const xmlJson = {}
+                    arr.forEach(item => {
+                        const contentArr = item.match(getContenReg);
+                        contentArr && (xmlJson[contentArr[1]] = contentArr[4] || contentArr[3])
+                    })
+                    console.log('xmlJson', xmlJson)
+    </script>
+</body>
+</html>

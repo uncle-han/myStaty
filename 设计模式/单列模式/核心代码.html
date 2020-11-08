@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <script>
+        // 问题：
+        function Alert(title) {
+            this.title = title
+        }
+
+        const a1 = new Alert('标题1')
+        const a2 = new Alert('标题2')
+        console.log(a1 === a2) // ==> false
+
+        // 解决方案
+
+        function Persion(name) {
+            this.name = name
+        }
+
+        let instance = null
+
+        const singleTon = function(name) {
+            if(!instance) instance = new Persion(name) 
+            return instance
+        }
+
+        const p1 = singleTon('xiaoxiao')
+        const p2 = singleTon('qqh')
+
+        console.log(p1 === p2) // output ==> true
+
+    </script>
+</body>
+</html>
