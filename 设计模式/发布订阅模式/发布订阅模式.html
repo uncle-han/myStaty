@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <script>
+        // 发布订阅
+        class Subscribe {
+            constructor() {
+                this.user = {}
+            }
+
+            // 频道 回调
+            on(channel, cb) {
+                const key = this.user[channel]
+                if(key) {
+                    this.user[channel].push(cb)
+                } else {
+                    this.user[channel] = [cb]
+                }
+            }
+
+            emit(channel, parme) {
+                const cdArray = this.user[channel]
+                // console.log(cdArray)
+                if(!cdArray) return
+                cdArray.forEach(item => {
+                    typeof item === 'function' && item(parme)
+                })
+            }
+
+        }
+    </script>
+</body>
+</html>
