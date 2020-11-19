@@ -68,3 +68,48 @@ SELECT manger_id "good good" from departments;
 ```
 <img src="./img/3.png">
 
+## 去重
+没有去重之前
+```
+SELECT department_id FROM myemployees.employees;
+```
+<img src="./img/4.png">
+
+使用关键字`distinct`去重
+```
+SELECT distinct department_id FROM myemployees.employees;
+```
+<img src="./img/5.png">
+
+# 拼接
+尝试一个结果
+```
+SELECT first_name, last_name from employees;
+```
+<img src="./img/6.png">
+
+做`first_name`和`last_name`的拼接
+尝试用`+`拼接
+```
+SELECT first_name + last_name from employees;
+```
+<img src="./img/7.png">
+
+解析：
+以前我们知道，select可以做为运算，在其他语言中，可以做为拼接字符串，但是在sql语言中，符号`+`只能作为运算符表达式，
+1. 尝试将字符串转成数值
+2. 如果成功，则为对应的数值，最后执行运算
+3. 如果不成功，则变成数值0，最后执行运算
+4. 如果运算符的其中一侧为`null`，最后的运算结构肯定为`null`;
+
+总结：`+`号只能作为运算符，不能拼接
+
+用`concat()`的方法拼接
+```
+SELECT CONCAT(first_name, "-", last_name) as add_opersion from employees;
+```
+<img src="./img/8.png">
+
+
+
+
