@@ -284,3 +284,55 @@ SELECT * FROM employees where commission_pct <=> null;
 ```
 <img src="./img/28.png">
 
+## 排序 order by
+语法：
+
+select 字段名
+from 表名
+[where 条件]
+[order by asc | desc]
+
+特点：
+ * 1、asc 为升序(默认)，desc 为降序
+ * 2、order by 子句中可以支持的排序的有：字段，表达式，别名，函数，多个字段
+ * 3、order by 子句一般放在查询语句的后面，limit子句除外
+
+--- 
+
+* 单个字段查询
+按工资降序排序查询员工信息
+
+```sql
+SELECT * FROM employees order by salary DESC ;
+```
+<img src="./img/29.png">
+
+* 表达式查询 
+按年薪降序排序查询员工姓名和年薪
+```sql
+SELECT last_name, salary * 12 *  IFNULL(commission_pct, 1) FROM employees  order by salary * 12 *  IFNULL(commission_pct, 1) desc;
+```
+<img src="./img/30.png">
+
+* 别名查询 
+按年薪降序排序查询员工姓名和年薪
+```sql
+SELECT last_name, salary * 12 *  IFNULL(commission_pct, 1) 年薪 FROM employees  order by 年薪 desc;
+```
+<img src="./img/31.png">
+
+* 函数查询
+按名字的长度降序，显示员工信息;
+```sql
+SELECT last_name, salary * 12 *  IFNULL(commission_pct, 1) 年薪 FROM employees  order by 年薪 desc;
+```
+<img src="./img/32.png">
+
+* 多个字段同时查询
+员工id升序，工资降序查询员工信息
+```sql
+SELECT * FROM  employees order by employee_id, salary DESC ;
+```
+<img src="./img/33.png">
+
+
