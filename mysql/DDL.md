@@ -335,4 +335,295 @@ SELECT * FROM  employees order by employee_id, salary DESC ;
 ```
 <img src="./img/33.png">
 
+---
+
+# 常用函数
+调用
+```
+select 函数名(实参)
+```
+
+分类
+1. 单行函数
+    * concat, length, ifnull等
+2. 分组函数
+    * 字符函数
+    * 数学函数
+    * 日期函数
+    * 其他函数
+    * 流程控制函数
+## 字符函数
+1. length
+查询字符串的`字节`长度
+```sql
+select length('你好abcd');
+```
+output: 10
+
+2. concat
+合并多个字符成一个字符
+查询员工的姓名，中间用`※`隔开，起别名为`姓名`
+```sql
+select concat()
+```
+<img src="./img/34.png">
+
+3. lower/upper
+lower 转小写
+upper 转大写
+```sql
+select lower('ABC');
+# output  =>  abc
+```
+
+```sql
+select upper('efg')
+# output =>  EFG
+```
+
+4. substr/substring
+截取字符串。传入的函数参数不同，实现不同的函数重装
+
+```sql
+select substr('abcdef', 2);
+# output => bcdef
+# ps: 截取的字符串，起始下标是1
+```
+
+查询用户姓名。第一个姓的字母大写，其他字母小写，用`-`隔开
+```sql
+SELECT CONCAT(UPPER(SUBSTRING(first_name, 1, 1)), substring(first_name, 2) , '-', LOWER(last_name)) 姓名 from employees;
+```
+<img src="./img/35.png">
+
+5. instr
+查找某个字符串是否在某个给定的字符串中，并返回查找的字符串的开始下标;查不到返回0
+```sql
+select instr('abcdef', 'de');
+# output => 4
+
+select instr('abcdef', 'g');
+# output => 0
+```
+
+6. trim
+去掉前后空格、某个种格式的字符
+```sql
+select length(trim('    abc    '));
+# output => 3
+
+select trim('aa' from 'aaaaaaa好的aaaaa好的aaaa');
+# output => 好的aaaaa好的
+```
+
+7. lpad
+parameter：
+第一个：目标字符串
+第二个：到指定长度
+第三个：要填充的字符串
+给定字符串左边填充某个字符串，到给定长度。
+
+```sql
+select lpad('嗯', 12, "*");
+# 嗯 字符串 前面填充 *  直到目标字符串长度为12
+# output => ***********嗯
+```
+8. rpad
+参数同上，当前函数在右边填充字符
+
+```sql
+select rpad('好', 5, '啊');
+# output => 好啊啊啊啊
+```
+
+9. replace
+替换，概念参考js的replace
+```sql
+select replace('abcdefgf', 'cdef', ' **** ');
+# output => ab **** gf
+```
+
+## 数学函数
+### round() 四舍五入
+```sql
+select round(1.5);
+# output => 2
+select round(-1.5);
+# output => -2
+select round(1.245, 2);
+# output => 1.25
+```
+### ceil() 向上取整
+```sql
+select ceil(1.2);
+# output => 2
+select ceil(-2.3);
+# output => -2
+```
+
+### floor() 向下取整
+```sql
+select floor(1.2);
+# output => 1
+select floor(-2.3);
+# output => -3
+```
+### mod() 取余数
+```sql
+select mod(10, 3);
+# output => 1
+SELECT 10 % 3;
+# output => 1
+```
+
+## 日期函数
+### now 返回当前系统日期时间
+```sql
+select now();
+# output => 2020-11-30 13:01:38
+```
+
+# 获取年，月，日，时，分，秒
+```sql
+select SELECT YEAR(now());
+# output => 2020
+SELECT YEAR(now()); # 2020
+SELECT YEAR("1999-1-1 20:59:59"); # 1999
+SELECT MONTH("1999-1-1 20:59:59"); # 1
+SELECT MONTHNAME(NOW()); # November
+SELECT DAYOFMONTH("1999-1-2 20:59:58");
+SELECT DAY("1999-1-1 20:59:59"); # 1
+```
+
+# str_to_date
+
+|符合|解析|
+|---|------|
+|%Y|四位的年|
+|%y|2位的年份|
+|%m|月份(01,02,...,11,12)|
+|%c|月份(1,2,...,11,12)|
+|%d|日(01,02,...)|
+|%H|小时(24小时制)|
+|%h|小时(12小时制)|
+|%i|分钟(00,01,...,59)|
+|%s|秒(00,01,...,59)|
+
+
+```sql
+SELECT str_to_date('1999-6-8', '%Y-%m-%d');
+# 1999-06-08
+```
+
+### date_fromat() 将时间转成指定格式
+```sql
+select date_format('2022-01-26', '%c月/%Y年 --%d日');
+# 1月/2022年 --26日
+```
+
+```sql
+SELECT DATE_FORMAT(hireadate, '%m月/%d日 %y年') from employees;
+```
+<img src="./img/36.png">
+
+---
+
+## 其他函数
+
+### version(), datebase(), user();
+查询当前mysql的版本号
+```sql
+select version();
+# 8.0.22
+```
+查询当前 use database的数据
+```sql
+select database();
+# myemployees
+```
+
+查询当前用户
+```sql
+select user();
+# root@192.168.196.1
+```
+
+## 流程控制预计
+### IF() 类似于js的 if eles 或者三元表达式
+```sql
+select if(10 > 9, '大', '小');
+# 大
+```
+### case when then end
+实现语法逻辑与js相同的功能
+```js
+var val = 2;
+switch (val) {
+    case 1 :
+        console.log('我是1');
+        break;
+    case 2 :
+        console.log('我是2');
+        break;
+    default:
+        console.log('我不知道');
+        break;
+}
+```
+在mysql中实现js中`switch case`的逻辑;
+```sql
+select
+case 2
+when 1 then '我是1'
+when 2 then '我是2'
+else '我不知道你是谁'
+end;
+```
+案例：
+当部门是133的，工资减半
+当部门是1203的，工资打7折
+其他为9折
+```sql
+SELECT salary 原始工资, 
+case salary
+when 133 then salary * 0.5
+when 1203 then salary * 0.7
+else salary * 0.9
+end 打折
+from employees;
+```
+在js中 `if() else if ()`
+```js
+var a = 3
+if(a < 2) {
+    console.log('我小于2')
+} else if (a < 3) {
+    console.log('我小于3')
+} else if (a < 4) {
+    console.log('我小于4')
+} else {
+    console.log('我也不知道怎么算')
+}
+```
+在mysql中实现
+案例：
+当工资大于20000 显示为高层
+当工资大于10000 显示为中层
+否则 老铁，你的工资没有毛病
+```sql
+select salary,
+case 
+when salary > 20000 then '高层'
+when salary > 10000 then '中层'
+else '老铁，你的工资没有毛病'
+end 薪资划分
+from employees;
+```
+<img src="./img/38.png">
+
+# 分组函数
+
+
+
+
 
