@@ -16,7 +16,7 @@ docker images mysql
 
 ## 运行镜像
 ```
-docker run -p 3306:3306 --name sutdymysql -v /mydocker/conf/mysql.conf:/etc/mysql/conf.d -v /mydocker/logs/mysqllogs:/logs -v /mydocker/data/mysqldata:/var/lib/mysql -e MYSQL_ROOT_PASSWORD=123456789 -d mysql
+docker run -p 3306:3306 --name sutdymysql -v /mydocker/conf/mysql.conf:/etc/mysql/conf.d -v /mydocker/logs/mysqllogs:/logs -v /mydocker/data/mysqldata:/var/lib/mysql -e MYSQL_ROOT_PASSWORD=root -d mysql
 ```
 * -d 后台启动
 * -p 3306:3306
@@ -27,8 +27,8 @@ docker run -p 3306:3306 --name sutdymysql -v /mydocker/conf/mysql.conf:/etc/mysq
     * /mydocker/conf/mysql.conf:/etc/mysql/conf.d
     * /mydocker/logs/mysqllogs:/logs
     * /mydocker/data/mysqldata:/var/lib/mysql
-* MYSQL_ROOT_PASSWORD=123456789
-    * 指定root用户登录的密码为：123456789
+* MYSQL_ROOT_PASSWORD=root
+    * 指定root用户登录的密码为：root
 
 ***此时，用navicat for mysql连接mysql发现报错：Client does not support authentication protocol requested  by server。。。***
 解决方案：
