@@ -621,9 +621,205 @@ from employees;
 ```
 <img src="./img/38.png">
 
-# 分组函数
+## 分组函数
+分组函数也叫聚合函数
+函数有：sum(), max(), min(), avg(), count()
+特点：
+* sum, avg() 一般只处理数字型，min, max, count 可以任何类型
+* 以上的分组忽略null的值
+* 可以和`distinct`搭配实现去重的运算
+* 和分组函数一同查询的字段要求是`group by`后的字段  
 
+## 分组查询
+语法
+```txt
+select 分组函数，列(要求出现在group by后面)
+from 表名
+[where 条件]
+group by 分组的列表
+[order by 列名]
+```
+*  案列：查询每个部门的平均工资
 
+```sql
+SELECT AVG(salary), department_id FROM employees
+where department_id  is NOT NULL 
+group by department_id;
+```
 
+<img src="./img/39.png">
+
+* 案列：查询每个位置的部门个数
+```sql
+select count(*), location_id from departments group by location_id
+```
+<img src="./img/40.png">
+
+### 在分组条件下，添加条件筛选
+* 邮箱中包含a字符的，每个部门的平均工资
+```sql
+SELECT AVG(salary), department_id FROM employees
+where email LIKE "%a%"
+group by department_id;
+```
+<img src="./img/41.png">
+
+* 查询哪个部门的员工个数 > 2
+
+```sql 
+SELECT COUNT(*), department_id FROM employees
+group by department_id
+HAVING count(*)>2;
+```
+<img src="./img/42.png">
+
+* 查询每个工种有奖金的员工的最高工资 > 12000
+
+```sql
+SELECT MAX(salary), job_id FROM employees
+where commission_pct IS NOT null
+group by job_id HAVING MAX(salary) > 12000;
+```
+
+<img src="./img/43.png">
+
+* 查询领导编号>102的每个领导手下的最低工资>5000的领导编号是哪个，以及其最低工资；
+
+```sql
+SELECT MIN(salary), manager_id FROM employees
+where manager_id  > 102
+GROUP BY manager_id
+HAVING MIN(salary) > 5000;
+```
+<img src="./img/44.png">
+### 分组查询的特点
+
+|特点|数据源|位置|关键字|
+|---|---|---|---|
+|分组前筛选|原始表|group by的前面|where|
+|分组后筛选|分组后的结果集|group by后面|having|
+
+### 按表达式或函数分组
+
+* 按员工姓名长度分组，查询每一组的员工的员工个数，筛选员工个数>5的有哪些
+
+```sql
+SELECT COUNT(*) c, LENGTH(CONCAT(last_name, first_name)) as len 
+FROM employees
+group by len
+HAVING c > 5;
+```
+<img src="./img/45.png">
+
+由上面的查询可以知道`group by`和`having` 都支持别名，
+但是oracle不支持
+
+* 查询每个部门每个工种的员工的平均工资
+
+```sql
+SELECT AVG(salary), department_id , job_id 
+FROM employees
+group by department_id, job_id;
+```
+<img src="./img/46.png">
+
+* 查询每个部门查询每个部门每个工种的员工的平均工资，并且按平均工资的高低显示
+
+```sql
+SELECT AVG(salary), department_id , job_id 
+FROM employees
+group by department_id, job_id
+ORDER by AVG(salary) DESC ;
+```
+
+<img src="./img/47.png">
+
+# 连接查询
+* 含义：又叫做连接查询，当查询的字段来自于多个表时，就会使用连接查询
+* 笛卡尔积：表一有n行，表二有m行，结果=m*n
+* 按功能分类：
+    * 内连接
+        * 等值连接
+        * 非等值连接
+        * 自连接
+    * 外连接
+        * 左连接
+        * 右连接
+        * 全连接
+    * 交叉连接
+
+## 等值连接
+
+* 查询员工对应的部门名
+```sql
+SELECT last_name, department_name 
+FROM employees, departments
+where employees.department_id = departments.department_id;
+```
+
+<img src="./img/48.png">
+
+### 为表起别名
+* 查询员工名，工种号，工种名
+```sql
+SELECT e.last_name, e.job_id, j.job_title 
+FROM jobs j, employees as e
+where e.job_id = j.job_id;
+```
+<img src="./img/49.png">
+
+由上面的查询语句可以知道
+* 表名可以支持别名
+
+### 连接查询，添加其他筛选条件
+使用`AND`连接条件
+* 查询有奖金的员工名、部门名
+```sql
+SELECT 
+last_name , department_name
+FROM employees e, departments d
+where e.department_id = d.department_id 
+AND e.commission_pct is NOT NULL;
+```
+<img src="./img/50.png">
+
+* 查询城市名中第二个字符为o的部门名和城市名
+```sql
+SELECT
+city, department_name
+FROM 
+locations l, departments d
+where
+l.location_id = d.location_id 
+AND
+l.city LIKE '_o%';
+```
+
+<img src="./img/51.png">
+
+* 查询每个城市的部门个数
+```sql
+SELECT 
+COUNT(*), city
+FROM departments d, locations l
+where d.location_id = l.location_id
+GROUP BY l.city ;
+```
+
+<img src="./img/52.png">
+
+* 查询有奖金的每个部门的部门名和部门的领导编号和该部门的最低工资
+
+```sql
+SELECT
+d.department_name, e.department_id, d.manager_id ,MIN(e.salary)
+FROM
+departments d ,employees e
+where
+e.department_id = d.department_id
+AND e.commission_pct IS NOT NULL
+GROUP BY e.department_id;
+```
+<img src="./img/53.png">
 
 
