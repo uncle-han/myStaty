@@ -1,6 +1,6 @@
 # redis 学习笔记
 ## 安装
-点击redis-6.0.9[下载](https://download.redis.io/releases/redis-6.0.9.tar.gz)链接
+点击[下载](https://download.redis.io/releases/redis-6.0.9.tar.gz)redis-6.0.9
 
 > 上传到服务器
 ```bash
