@@ -40,7 +40,7 @@ PONG
 redis数据库安装成功，撒花
 
 ## 对key的操作
-> del
+> `del` key [key ...]
 
 删除key,
 ```sql
@@ -52,7 +52,7 @@ OK
 (integer) 1
 127.0.0.1:6379> 
 ```
-> exists
+> `exists` key [key ...]
 
 查看key是否存在
 ```sql
@@ -62,7 +62,7 @@ OK
 (integer) 0
 127.0.0.1:6379> 
 ```
-> expire
+> expire key seconds
 
 给key添加过期时间，以秒s为单位，过期后不可用
 ```sql
@@ -77,7 +77,7 @@ OK
 (nil) # 已经无法再拿到key
 ```
 
-> pexpire
+> `pexpire` key milliseconds
 
 给字段设置过期时间，以毫秒为单位
 ```sql
@@ -94,7 +94,7 @@ OK
 127.0.0.1:6379> 
 ```
 
-> keys
+> `keys` pattern
 
 查找给定格式的key
 
@@ -108,7 +108,7 @@ OK
 3) "k1"
 ```
 
-> pttl
+> `pttl` milliseconds
 
 以毫秒的形式返回key剩余的过期时间
 
@@ -126,7 +126,7 @@ OK
 127.0.0.1:6379> 
 ```
 
-> ttl
+> `ttl` seconds
 
 以秒为单位，返回key剩余的过期时间
 ```sql
@@ -139,7 +139,7 @@ OK
 127.0.0.1:6379> 
 ```
 
-> move
+> `move` key db
 
 将key移动到其他数据，被移走后，当前数据库不存在被移走的key
 
@@ -163,7 +163,7 @@ OK
 127.0.0.1:6379[1]> 
 ```
 
-> randomkey
+> `randomkey`
 
 从数据库中随机返回一个key
 
@@ -179,7 +179,7 @@ OK
 127.0.0.1:6379> 
 ```
 
-> rename
+> `rename` key newkey
 
 将旧key修改成新key
 
@@ -195,7 +195,7 @@ OK
 127.0.0.1:6379> 
 ```
 
-> renamenx
+> `renamenx` key newkey
 
 当要成的新key不存在则成功，存在着不成功
 
@@ -213,7 +213,9 @@ OK
 127.0.0.1:6379> 
 ```
 
-> type 检测key对应的值的类型
+> `type` key
+
+检测key对应的值的类型
 
 ```sql
 127.0.0.1:6379> get k1
@@ -226,5 +228,151 @@ string
 
 ## string 类型
 
+> `set` key value
+
+生成一个键对值
+
+```bash
+127.0.0.1:6379> set a1 b1
+OK
+127.0.0.1:6379> get a1
+"b1"
+```
+
+> `get` key
+
+获取key对应的value
+
+```bash
+127.0.0.1:6379> get k1
+"v1"
+127.0.0.1:6379> keys *
+ 1) "k12"
+ 2) "k5"
+ 3) "k2"
+ 4) "k9"
+ 5) "k13"
+ 6) "k10"
+ 7) "k4"
+ 8) "k7"
+ 9) "k8"
+10) "k1"
+11) "k3"
+12) "k6"
+13) "k11"
+14) "a1"
+127.0.0.1:6379> get k20
+(nil)
+127.0.0.1:6379> 
+```
+
+> `getrange` key start end
+
+截取对应键名起始下标之间的值
+
+```bash
+127.0.0.1:6379> set letter abcdefghikj
+OK
+127.0.0.1:6379> getrange letter 1 5
+"bcdef" # 下标从0开始
+127.0.0.1:6379> getrange aaaa 1 2 # 不存在
+""
+127.0.0.1:6379> 
+```
+
+> `getset` key newvalue
+
+先获取对应key的值，在给对应的key设置新的值
+
+```bash
+127.0.0.1:6379> get k1
+"v1"
+127.0.0.1:6379> getset k1 vvv
+"v1"
+127.0.0.1:6379> get k1
+"vvv"
+```
+
+> `mset` key value [key value ...]
+
+同时设置多个字段
+```bash
+127.0.0.1:6379> keys *
+(empty array)
+127.0.0.1:6379> mset k1 v1 k2 v2 k3 v3
+OK
+127.0.0.1:6379> keys *
+1) "k3"
+2) "k2"
+3) "k1"
+```
+
+> `setnx` key value
+
+设置key对应的值，当key不存在的时候，才设置，存在的时候设置失败
+
+```bash
+127.0.0.1:6379> get k3
+"v3"
+127.0.0.1:6379> set k3 v1 # 设置原本存在的key，会被覆盖
+OK
+127.0.0.1:6379> get k3
+"v1"
+127.0.0.1:6379> setnx k3 v4 # 原本存在的key，不会设置成功
+(integer) 0
+127.0.0.1:6379> get k3
+"v1"
+127.0.0.1:6379> keys * 
+1) "k3"
+2) "k2"
+3) "k1"
+127.0.0.1:6379> setnx k4 v4 # 不存在的key，不会成功
+(integer) 1
+```
+
+> `setrange` key offset value
+
+设置给定的key的值，从偏移量开始填充
+* 偏移量大于key给定的值的字符串长度，就在最后添加
+* 给定的偏移量小于key的值的字符串长度，会覆盖原来的值
+
+```bash
+127.0.0.1:6379> get k2
+"v2"
+127.0.0.1:6379> setrange k2 2 AA # 大于给定key的字符串的长度
+(integer) 4
+127.0.0.1:6379> get k2
+"v2AA"
+127.0.0.1:6379> get letter
+"abcdefghijk"
+127.0.0.1:6379> setrange letter 3 AAA # 小于原来的key的长度
+(integer) 11
+127.0.0.1:6379> get letter
+"abcAAAghijk"
+```
+
+> `setex` key seconds value
+
+设置键名和对应的值，并给予过期时间，过期时间是秒
+
+```bash
+127.0.0.1:6379> setex time 20 seconds
+OK
+127.0.0.1:6379> ttl time
+(integer) 14
+127.0.0.1:6379> ttl time
+(integer) 11
+127.0.0.1:6379> ttl time
+(integer) 6
+127.0.0.1:6379> ttl time
+(integer) 0
+127.0.0.1:6379> ttl time
+(integer) -2
+127.0.0.1:6379> get time
+(nil)
+```
+
+
+## list 类型
 
 
