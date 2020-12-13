@@ -1288,6 +1288,348 @@ Object.values(handsomeboy)
 迭代对应hash
 
 
+## Set 集合
+
+* Redis 的 Set 是 String 类型的无序集合。集合成员是唯一的，这就意味着集合中不能出现重复的数据。
+
+* Redis 中集合是通过哈希表实现的，所以添加，删除，查找的复杂度都是 O(1)。
 
 
+> Sadd key value [value ...]
+
+向集合添加一个或者多个成员
+
+```bash
+127.0.0.1:6379> Sadd left a
+(integer) 1
+127.0.0.1:6379> Sadd left b
+(integer) 1
+127.0.0.1:6379> Sadd left c
+(integer) 1
+127.0.0.1:6379> Smembers left
+1) "c"
+2) "a"
+3) "b"
+127.0.0.1:6379> Sadd left d e
+(integer) 2
+127.0.0.1:6379> Smembers left
+1) "c"
+2) "a"
+3) "d"
+4) "b"
+5) "e"
+127.0.0.1:6379> Sadd left a # 集合已经有了该元素，就添加失败。体现了集合的唯一性
+(integer) 0
+```
+
+> Scard key
+
+获取集合的成员数
+
+```bash
+127.0.0.1:6379> Smembers left
+1) "c"
+2) "a"
+3) "d"
+4) "b"
+5) "e"
+127.0.0.1:6379> Scard left
+(integer) 5
+```
+
+> Sdiff
+
+返回第一个集合与其他集合之间的差异。
+
+```bash
+127.0.0.1:6379> Smembers left
+1) "c"
+2) "a"
+3) "d"
+4) "b"
+5) "e"
+127.0.0.1:6379> Sadd right a b c d
+(integer) 4
+127.0.0.1:6379> Sdiff left
+1) "a"
+2) "c"
+3) "b"
+4) "d"
+5) "e"
+127.0.0.1:6379> Sdiff left right
+1) "e"
+127.0.0.1:6379> Sdiff right left
+(empty array)
+```
+
+> Sdiffstore destination key [ key2 ]
+
+将两个集合之间的差异，存到另外一个集合中，并返回差异
+
+```bash
+127.0.0.1:6379> Smembers left 
+1) "c"
+2) "d"
+3) "a"
+4) "b"
+5) "e"
+127.0.0.1:6379> Smembers right
+1) "c"
+2) "a"
+3) "d"
+4) "b"
+127.0.0.1:6379> SdiffStore other left right
+(integer) 1
+127.0.0.1:6379> Smembers other
+1) "e"
+```
+
+> Sinter key1 [key2 ]
+
+返回两个集合的交集
+
+```bash
+127.0.0.1:6379> Smembers left
+1) "c"
+2) "d"
+3) "a"
+4) "b"
+5) "e"
+127.0.0.1:6379> Smembers right
+1) "c"
+2) "a"
+3) "d"
+4) "b"
+127.0.0.1:6379> Sinter left right
+1) "c"
+2) "a"
+3) "d"
+4) "b"
+```
+
+
+> SinterStore destination key key2
+
+找出两个集合中的交集，存到另外一个集合中
+
+```bash
+127.0.0.1:6379> Smembers center
+(empty array)
+127.0.0.1:6379> Smembers left
+1) "c"
+2) "d"
+3) "a"
+4) "b"
+5) "e"
+127.0.0.1:6379> Smembers right
+1) "c"
+2) "a"
+3) "d"
+4) "b"
+127.0.0.1:6379> SinterStore center left right
+(integer) 4
+127.0.0.1:6379> Smembers center
+1) "a"
+2) "c"
+3) "b"
+4) "d"
+```
+
+> SisMember key member
+
+查看是不是给定集合的成员
+
+```
+127.0.0.1:6379> Smembers left 
+1) "c"
+2) "d"
+3) "a"
+4) "b"
+5) "e"
+127.0.0.1:6379> Sismember left a
+(integer) 1
+127.0.0.1:6379> Sismember left f
+(integer) 0
+```
+
+> Smembers
+
+查看指定键名的所有成员
+
+```bash
+127.0.0.1:6379> Sadd myset A B C D E
+(integer) 5
+127.0.0.1:6379> Smembers myset
+1) "B"
+2) "A"
+3) "D"
+4) "C"
+5) "E"
+```
+
+> Smove
+
+将 member 元素从 source 集合移动到 destination 集合
+
+```bash
+127.0.0.1:6379> Sadd left FFF
+(integer) 1
+127.0.0.1:6379> Smembers left
+1) "c"
+2) "d"
+3) "FFF"
+4) "a"
+5) "b"
+6) "e"
+127.0.0.1:6379> Smembers right
+1) "c"
+2) "a"
+3) "d"
+4) "b"
+127.0.0.1:6379> Smove left right FFF
+(integer) 1
+127.0.0.1:6379> Smembers left
+1) "c"
+2) "d"
+3) "a"
+4) "b"
+5) "e"
+127.0.0.1:6379> Smembers right
+1) "d"
+2) "b"
+3) "c"
+4) "FFF"
+5) "a"
+```
+
+> Spop key count
+
+随机移除集合中的一(多)个成员，并返回移除的成员
+
+```bash
+127.0.0.1:6379> Smembers left
+1) "c"
+2) "d"
+3) "a"
+4) "b"
+5) "e"
+127.0.0.1:6379> Spop left 2
+1) "d"
+2) "b"
+127.0.0.1:6379> Smembers left
+1) "c"
+2) "a"
+3) "e"
+```
+
+> SrandMember
+
+随机返回集合的成员，并没有删除
+
+```bash
+127.0.0.1:6379> Smembers right
+1) "d"
+2) "b"
+3) "c"
+4) "FFF"
+5) "a"
+127.0.0.1:6379> Srandmember right 3
+1) "d"
+2) "FFF"
+3) "b"
+127.0.0.1:6379> Srandmember right 3
+1) "d"
+2) "FFF"
+3) "a"
+127.0.0.1:6379> Srandmember right 3
+1) "c"
+2) "FFF"
+3) "b"
+127.0.0.1:6379> Smembers right
+1) "d"
+2) "b"
+3) "c"
+4) "FFF"
+5) "a"
+```
+
+> Srem
+
+移除集合中一(多)个成员
+
+```bash
+127.0.0.1:6379> Smembers right
+1) "d"
+2) "b"
+3) "c"
+4) "FFF"
+5) "a"
+127.0.0.1:6379> Srem right a b FFF
+(integer) 3
+127.0.0.1:6379> Smembers right
+1) "c"
+2) "d"
+```
+
+> Sunion
+
+返回给定集合的并集。不存在的集合 key 被视为空集。
+
+```bash
+127.0.0.1:6379> Smembers left
+1) "c"
+2) "a"
+3) "e"
+127.0.0.1:6379> Smembers right
+1) "c"
+2) "d"
+127.0.0.1:6379> Sunion right left
+1) "a"
+2) "c"
+3) "e"
+4) "d"
+```
+
+> SunionStore destination key1 [key2 ...]
+
+返回给定集合的交集，并存到destination集合中
+
+```bash
+1) "c"
+2) "a"
+3) "e"
+127.0.0.1:6379> Smembers right
+1) "c"
+2) "d"
+127.0.0.1:6379> SunionStore box left right
+(integer) 4
+127.0.0.1:6379> Smembers box
+1) "a"
+2) "c"
+3) "d"
+4) "e"
+```
+
+> Sscan key cursor [march pattern] [CONUT conut]
+
+迭代指定的集合
+
+```
+127.0.0.1:6379> Sadd program javascript java php html css c c++ c# object-c
+(integer) 9
+127.0.0.1:6379> Smembers program
+1) "javascript"
+2) "c"
+3) "css"
+4) "c#"
+5) "php"
+6) "html"
+7) "java"
+8) "c++"
+9) "object-c"
+127.0.0.1:6379> Sscan program 0 match j*
+1) "0"
+2) 1) "java"
+   2) "javascript"
+```
 
