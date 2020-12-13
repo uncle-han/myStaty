@@ -213,6 +213,27 @@ OK
 127.0.0.1:6379> 
 ```
 
+> persist key
+
+将有设置过期时间的key，去掉过期时间，变成永久保存
+
+```bash
+127.0.0.1:6379> set time yyyyyyyy
+OK
+127.0.0.1:6379> get time
+"yyyyyyyy"
+127.0.0.1:6379> pexpire time 60000
+(integer) 1
+127.0.0.1:6379> pttl time
+(integer) 37192
+127.0.0.1:6379> persist time
+(integer) 1
+127.0.0.1:6379> pttl time
+(integer) -1
+127.0.0.1:6379> get time
+"yyyyyyyy"
+```
+
 > `type` key
 
 检测key对应的值的类型
@@ -223,8 +244,6 @@ OK
 127.0.0.1:6379> type k1
 string
 ```
-
-
 
 ## string 类型
 
@@ -372,7 +391,903 @@ OK
 (nil)
 ```
 
+> `strlen` key
+
+返回key对应的值的长度
+
+```bash
+127.0.0.1:6379> get letter
+"abcAAAghijk"
+127.0.0.1:6379> strlen letter
+(integer) 11
+```
+
+> msetnx key value [key value]
+
+当要设置的key都不存在，则设置成功，当设置的键名有一个存在，则都不成功`mset`和 `setnx`命令的组合
+
+```bash
+127.0.0.1:6379> keys *
+1) "k2"
+2) "k1"
+127.0.0.1:6379> msetnx k1 b1 k2 b2 k3 b3 # 当前存在k1 k2
+(integer) 0 # 设置不成功
+127.0.0.1:6379> mget k1 k2 k3
+1) "v1"
+2) "v2"
+3) (nil) # 获取不到
+127.0.0.1:6379> msetnx k3 b3 k4 b4 # k3 k4 都不存在
+(integer) 1
+127.0.0.1:6379> mget k1 k2 k3 k4
+1) "v1"
+2) "v2"
+3) "b3" # 正确获取到
+4) "b4" # 正确获取到
+```
+
+> psetex key milliseseconds value
+
+与`setex` 类似，但是是给键名设置毫秒数
+
+```bash
+127.0.0.1:6379> psetex millise 20000 xxxxxxxxxxxx
+OK
+127.0.0.1:6379> pttl millise
+(integer) 11018
+```
+
+> incr key 
+
+给对应的key加1操作，只能自增数组类型
+
+```bash
+127.0.0.1:6379> set A a
+OK
+127.0.0.1:6379> incr A
+(error) ERR value is not an integer or out of range
+127.0.0.1:6379> set num 1
+OK
+127.0.0.1:6379> incr num
+(integer) 2
+127.0.0.1:6379> incr num
+(integer) 3
+127.0.0.1:6379> set ten 10
+OK
+127.0.0.1:6379> incr ten
+(integer) 11
+```
+
+> incrby key increment
+
+对指定的key自增给定的量
+
+```
+127.0.0.1:6379> get num
+"15"
+127.0.0.1:6379> incrby num 5
+(integer) 20
+```
+
+> incrbyfloat key increment
+
+增加浮点类型的数组给指定的key相加
+
+```bash
+127.0.0.1:6379> set num 20
+OK
+127.0.0.1:6379> incrbyfloat num 0.001
+"20.001"
+```
+
+> decr key
+
+对指定的key自减1操作
+
+```
+127.0.0.1:6379> set num 10
+OK
+127.0.0.1:6379> get num
+"10"
+127.0.0.1:6379> decr num
+(integer) 9
+127.0.0.1:6379> decr num
+(integer) 8
+127.0.0.1:6379> 
+```
+
+> decrby
+
+对指定的key，减一定量的值，对数组起作用
+
+```bash
+127.0.0.1:6379> get num
+"8"
+127.0.0.1:6379> decrby num 5
+(integer) 3
+127.0.0.1:6379> decrby num aa
+(error) ERR value is not an integer or out of range
+```
+
+> append key value
+
+对指定的key后面追加value，不存在的key，会新建
+
+```
+127.0.0.1:6379> set letter abcd
+OK
+127.0.0.1:6379> append letter -efgh
+(integer) 9
+127.0.0.1:6379> get letter 
+"abcd-efgh"
+127.0.0.1:6379> set num 123
+OK
+127.0.0.1:6379> append num 456
+(integer) 6
+127.0.0.1:6379> get num
+"123456"
+127.0.0.1:6379> keys *
+1) "num"
+2) "letter"
+127.0.0.1:6379> append k1 v1
+(integer) 2
+127.0.0.1:6379> get k1
+"v1"
+```
 
 ## list 类型
+
+* Redis列表是简单的字符串列表，按照插入顺序排序。你可以添加一个元素到列表的头部（左边）或者尾部（右边）
+* 一个列表最多可以包含 232 - 1 个元素 (4294967295, 每个列表超过40亿个元素)。
+
+> lpush key value [value ...]
+
+生成给定的key的list数据，可以同时push多个
+
+```bash
+127.0.0.1:6379> lpush list1 a b c d
+(integer) 4 # 返回list的长度
+127.0.0.1:6379> get list
+(nil)
+127.0.0.1:6379> get list1 # get是针对字符串的
+(error) WRONGTYPE Operation against a key holding the wrong kind of value
+127.0.0.1:6379> lrange list1 0 10 # 需要lrange查看范围内的字符
+1) "d"
+2) "c"
+3) "b"
+4) "a"
+127.0.0.1:6379> lpush list1 e # 可以对已经存在的list进行push操作
+(integer) 5
+127.0.0.1:6379> lrange list1 0 10
+1) "e"
+2) "d"
+3) "c"
+4) "b"
+5) "a"
+127.0.0.1:6379> type list1 # 检查list的数据类型
+list
+127.0.0.1:6379>
+```
+
+> blpop key [key ...] timeout
+
+* 从边开始删除一/多个元素，如果列表没有元素会`阻塞`列表直到等待`超时`或发现`可弹出`元素为止。
+* 超时设置以秒(s)为单位
+
+```bash
+127.0.0.1:6379> lrange list 0 10 # 为空的list
+(empty array)
+127.0.0.1:6379> lpush list a b # 新建list
+(integer) 2
+127.0.0.1:6379> lrange list 0 10 # 获取一定范围内的list
+1) "b"
+2) "a"
+127.0.0.1:6379> blpop list 10 # 从这边删除一个，就回去当前元素
+1) "list"
+2) "b" # 获取到被删除的第一个元素
+127.0.0.1:6379> lrange list 0 10 # 查看被删除的list
+1) "a"
+127.0.0.1:6379> blpop list1 10 # 查看不存在的list1
+(nil)
+(10.03s) # 超时退出
+127.0.0.1:6379> 
+```
+
+> brpop key [key ...] timeout
+
+和blpop类似，但是brpop是从右边删除,被获取被删除的元素
+
+```bash
+127.0.0.1:6379> lpush Llist a b
+(integer) 2
+127.0.0.1:6379> lrange Llist 0 10
+1) "b"
+2) "a"
+127.0.0.1:6379> brpop Llist 10
+1) "Llist"
+2) "a"
+127.0.0.1:6379> lrange Llist 0 10
+1) "b"
+127.0.0.1:6379> brpop Llist1 5
+(nil)
+(5.09s)
+127.0.0.1:6379>
+```
+
+> brpoplpush source destination timeout
+
+source key 最后一个/右边第一个删除,并放到目标key的第一个位置/最左边的位置，如果不存在source或者为空，会阻塞列表，直到超时，或者有可以弹出的元素
+
+```bash
+127.0.0.1:6379> lrange L 0 10
+1) "b"
+2) "a"
+127.0.0.1:6379> lrange R 0 10
+1) "d"
+2) "c"
+127.0.0.1:6379> brpoplpush L R 10
+"a"
+127.0.0.1:6379> lrange L 0 10
+1) "b"
+127.0.0.1:6379> lrange R 0 10
+1) "a"
+2) "d"
+3) "c"
+127.0.0.1:6379> 
+```
+
+> lindex key index
+
+获取对应键名对应的下标值
+
+```bash
+127.0.0.1:6379> lpush ind a b c d
+(integer) 4
+127.0.0.1:6379> lindex ind 1
+"c"
+127.0.0.1:6379> lrange ind 0 10
+1) "d"
+2) "c"
+3) "b"
+4) "a"
+```
+
+> linsert
+
+
+
+> llen
+
+查看对应的list的长度
+
+```
+127.0.0.1:6379> lrange ind 0 10
+1) "d"
+2) "c"
+3) "b"
+4) "a"
+127.0.0.1:6379> llen ind
+(integer) 4
+127.0.0.1:6379> 
+```
+
+> lpop
+
+* 在指定的list删掉第一个/左边开始，并返回删除的那个元素
+
+```bash
+127.0.0.1:6379> lrange mylist 0 10
+1) "c"
+2) "b"
+3) "a"
+127.0.0.1:6379> lpop mylist # 删除最左边的元素
+"c"
+127.0.0.1:6379> lrange mylist 0 10
+1) "b"
+2) "a"
+127.0.0.1:6379> 
+```
+
+> lpushx
+
+和lpush功能完全类似，
+* lpush，如果key存在，则往前面追加，不存在，则新建key，追加到前面
+
+* lpushx，如果key不存在，则不会成功追加，key存在才会成功追加
+
+
+```bash
+127.0.0.1:6379> lrange mylist 0 10
+1) "b"
+2) "a"
+127.0.0.1:6379> lpushx mylist c #存在
+(integer) 3 # 追加成功
+127.0.0.1:6379> lrange mylist 0 10
+1) "c" # 追加到前面
+2) "b"
+3) "a"
+127.0.0.1:6379> lpush mylist C
+(integer) 4
+127.0.0.1:6379> lrange mylist 0 10
+1) "C"
+2) "c"
+3) "b"
+4) "a"
+127.0.0.1:6379> lpushx mylist1 D
+(integer) 0
+127.0.0.1:6379> lrange mylist1 0 10
+(empty array)
+127.0.0.1:6379> lpush mylist2 E
+(integer) 1
+127.0.0.1:6379> lrange mylist2 0 10
+1) "E"
+```
+
+> lrange
+
+* 查看对应的key的范围内的值
+
+```bash
+127.0.0.1:6379> lpush mylist a b c d
+(integer) 4
+127.0.0.1:6379> lrange mylist 0 10 # 查看范围0 - 10之间的值
+1) "d"
+2) "c"
+3) "b"
+4) "a"
+127.0.0.1:6379> lrange mylist 0 -1 # 查看0 到 最后一个的值
+1) "d"
+2) "c"
+3) "b"
+4) "a"
+127.0.0.1:6379> lrange mylist 0 -2 # 查看 0 到倒数第二个的值
+1) "d"
+2) "c"
+3) "b"
+```
+
+> lrem key count value
+
+根据给定的key，删除一定数量的value
+
+* count > 0，从key的开头开始搜索，删除count个value
+
+```bash
+127.0.0.1:6379> lrange list1 0 -1
+ 1) "d"
+ 2) "c"
+ 3) "b"
+ 4) "a"
+ 5) "a"
+ 6) "a"
+ 7) "a"
+ 8) "a"
+ 9) "a"
+10) "a"
+127.0.0.1:6379> lrem list1 5 a
+(integer) 5
+127.0.0.1:6379> lrange list1 0 -1
+1) "d"
+2) "c"
+3) "b"
+4) "a"
+5) "a"
+127.0.0.1:6379> 
+```
+
+* count < 0，从key尾部开始搜索，删除绝对值count个value
+
+```bash
+127.0.0.1:6379> lrange list2 0 -1
+ 1) "c"
+ 2) "c"
+ 3) "c"
+ 4) "c"
+ 5) "c"
+ 6) "c"
+ 7) "c"
+ 8) "c"
+ 9) "b"
+10) "a"
+127.0.0.1:6379> lrem list2 -5 c
+(integer) 5
+127.0.0.1:6379> lrange list2 0 -1
+1) "c"
+2) "c"
+3) "c"
+4) "b"
+5) "a"
+```
+
+* count = 0，删除key里面所有与value相等的值
+
+```bash
+127.0.0.1:6379> lpush list4 a b b b b b b b c
+(integer) 9
+127.0.0.1:6379> lrem list4 0 b
+(integer) 7
+127.0.0.1:6379> lrange list4 0 -1
+1) "c"
+2) "a"
+```
+
+
+> lset key index value
+
+通过下标修改对应key的值
+
+```bash
+127.0.0.1:6379> lrange list4 0 -1
+1) "c"
+2) "a"
+127.0.0.1:6379> lset list4 1 B
+OK
+127.0.0.1:6379> lrange list4 0 -1
+1) "c"
+2) "B"
+```
+
+> ltrim
+
+修剪，将不在给定区间范围内的元素删除掉
+
+```bash
+127.0.0.1:6379> rpush list a b c d e f g h i j k l m n
+(integer) 14
+127.0.0.1:6379> lrange list 0 -1
+ 1) "a" # 0
+ 2) "b" # 1
+ 3) "c" # 2
+ 4) "d" # 3
+ 5) "e" # 4
+ 6) "f" # 5
+ 7) "g" # 6
+ 8) "h" # 7
+ 9) "i" # 8
+10) "j" # 9
+11) "k" # 10
+12) "l" # 11
+13) "m" # 12
+14) "n" # 13
+127.0.0.1:6379> ltrim list 2 10
+OK
+127.0.0.1:6379> lrange list 0 -1
+1) "c"
+2) "d"
+3) "e"
+4) "f"
+5) "g"
+6) "h"
+7) "i"
+8) "j"
+9) "k"
+127.0.0.1:6379> 
+```
+
+> rpop
+
+从右边/最后面删除一个，并返回
+
+```bash
+127.0.0.1:6379> lrange list 0 -1
+1) "c"
+2) "d"
+3) "e"
+4) "f"
+5) "g"
+6) "h"
+7) "i"
+8) "j"
+9) "k"
+127.0.0.1:6379> rpop list 
+"k"
+127.0.0.1:6379> lrange list 0 -1
+1) "c"
+2) "d"
+3) "e"
+4) "f"
+5) "g"
+6) "h"
+7) "i"
+8) "j"
+```
+
+> rpoplpush
+
+从目标list最后面(右边第一个)删除一个元素，并将删除的元素push到另外一个list最前面(左边第一个)
+
+```bash
+127.0.0.1:6379> lpush up A B C
+(integer) 3
+127.0.0.1:6379> lpush low a b c
+(integer) 3
+127.0.0.1:6379> lrange up 0 -1
+1) "C"
+2) "B"
+3) "A"
+127.0.0.1:6379> lrange low 0 -1
+1) "c"
+2) "b"
+3) "a"
+127.0.0.1:6379> rpoplpush up low
+"A"
+127.0.0.1:6379> lrange up 0 -1 # 最后一个元素被删除
+1) "C"
+2) "B"
+127.0.0.1:6379> lrange low 0 -1 # 前面删除的元素，被追加到最前面的位置
+1) "A"
+2) "c"
+3) "b"
+4) "a"
+```
+
+> rpush key value [value ...]
+
+* lpush是从左边/最前面push值，rpush是从右边/最后面push值
+
+* 如果key存在，则追加
+
+```bash
+127.0.0.1:6379> lpush L-list A B C
+(integer) 3
+127.0.0.1:6379> rpush R-list A B C
+(integer) 3
+127.0.0.1:6379> lrange L-list 0 -1
+1) "C"
+2) "B"
+3) "A"
+127.0.0.1:6379> lrange R-list 0 -1
+1) "A"
+2) "B"
+3) "C"
+```
+
+> rpushx key value [value ...]
+
+与lpushx功能完全类似，对已存在的list追加值
+
+```bash
+127.0.0.1:6379> rpush list A B
+(integer) 2
+127.0.0.1:6379> rpushx list C D 
+(integer) 4
+127.0.0.1:6379> lrange list 0 -1 # 已存在的key，可以追加
+1) "A"
+2) "B"
+3) "C"
+4) "D"
+127.0.0.1:6379> rpushx list1 C D  # 不存在的key，追加失败，区别于rpush
+(integer) 0
+127.0.0.1:6379> lrange list1 0 -1 # rpush，及时rpush不存在，都会新建再追加
+(empty array)
+127.0.0.1:6379> rpush list1 C D
+(integer) 2
+127.0.0.1:6379> lrange list1 0 -1
+1) "C"
+2) "D"
+```
+
+## Hash
+Redis hash 是一个 string 类型的 field（字段） 和 value（值） 的映射表，hash 特别适合用于存储对象。
+
+* 在js中这样定义对象的
+```js
+const handsomeboy = {
+    name: 'qqh',
+    sex: 'man',
+    age: 18,
+    skill: 'js html css'
+}
+```
+* 将js对象转换为redis的hash是这样表示的
+
+```bash
+127.0.0.1:6379> HMset handsomeboy name "qqh" sex "man" age 18 skill "js html css"
+OK
+127.0.0.1:6379> HgetAll handsomeboy
+1) "name"
+2) "qqh"
+3) "sex"
+4) "man"
+5) "age"
+6) "18"
+7) "skill"
+8) "js html css"
+127.0.0.1:6379> type handsomeboy
+hash
+```
+
+
+> Hdel key field
+
+删除一个或多个哈希表字段
+
+```bash
+127.0.0.1:6379> HgetAll handsomeboy
+1) "name"
+2) "qqh"
+3) "sex"
+4) "man"
+5) "age"
+6) "18"
+7) "skill"
+8) "js html css"
+127.0.0.1:6379> Hdel handsomeboy sex # 删除性别sex字段
+(integer) 1
+127.0.0.1:6379> HgetAll handsomeboy
+1) "name"
+2) "qqh"
+3) "age"
+4) "18"
+5) "skill"
+6) "js html css"
+```
+
+> Hexists key field [field ...]
+
+查看哈希表 key 中，指定的字段是否存在。
+
+```bash
+127.0.0.1:6379> HgetAll handsomeboy
+1) "name"
+2) "qqh"
+3) "age"
+4) "18"
+5) "skill"
+6) "js html css"
+127.0.0.1:6379> Hexists handsomeboy sex # 不存在的field
+(integer) 0
+127.0.0.1:6379> Hexists handsomeboy name # 存在的字段field
+(integer) 1
+```
+
+> Hget key field
+
+返回给定key对应的字段的值,只返回一个值
+
+```bash
+127.0.0.1:6379> HgetAll handsomeboy
+1) "name"
+2) "qqh"
+3) "age"
+4) "18"
+5) "skill"
+6) "js html css"
+127.0.0.1:6379> Hget handsomeboy name #查看存在的字段
+"qqh"
+127.0.0.1:6379> Hget handsomeboy sex # 查看不存在的字段
+(nil)
+127.0.0.1:6379> Hget h f #查看不存在的key和field
+(nil)
+```
+
+> HgetAll
+
+查看给定key下所有字段
+
+```bash
+127.0.0.1:6379> HgetAll handsomeboy
+1) "name"
+2) "qqh"
+3) "age"
+4) "18"
+5) "skill"
+6) "js html css"
+127.0.0.1:6379> HgetAll handsomeboy1 # 不存在的
+(empty array)
+```
+
+> HincrBy key field increment
+
+给指定的key，对应的`数字`字段，增加给定的量
+
+```bash
+127.0.0.1:6379> HgetALL handsomeboy
+1) "name"
+2) "qqh"
+3) "age"
+4) "18"
+5) "skill"
+6) "js html css"
+127.0.0.1:6379> Hincrby handsomeboy age 10
+(integer) 28
+127.0.0.1:6379> HgetALL handsomeboy
+1) "name"
+2) "qqh"
+3) "age"
+4) "28"
+5) "skill"
+6) "js html css"
+```
+
+
+> HincrByFloat
+
+为哈希表key中的指定字段的浮点数值加上增量 increment
+
+```bash
+127.0.0.1:6379> HgetAll handsomeboy
+1) "name"
+2) "qqh"
+3) "age"
+4) "28"
+5) "skill"
+6) "js html css"
+127.0.0.1:6379> HincrByfloat handsomeboy age 10.001 # 给指定指定增加
+"38.001"
+127.0.0.1:6379> HgetAll handsomeboy
+1) "name"
+2) "qqh"
+3) "age"
+4) "38.001"
+5) "skill"
+6) "js html css"
+```
+
+> Hkeys
+
+相当于js中的一个方法
+
+```js
+const handsomeboy = {
+    name: 'qqh',
+    sex: 'man',
+    age: 18,
+    skill: 'js html css'
+}
+
+Object.keys(handsomeboy)
+```
+
+遍历出给定的key的所有字段名field
+
+```js
+127.0.0.1:6379> HgetALL handsomeboy
+1) "name"
+2) "qqh"
+3) "age"
+4) "38.001"
+5) "skill"
+6) "js html css"
+127.0.0.1:6379> Hkeys handsomeboy
+1) "name"
+2) "age"
+3) "skill"
+```
+
+> Hlen
+
+查看对应的key的长度
+
+```bash
+127.0.0.1:6379> HgetAll handsomeboy
+1) "name"
+2) "qqh"
+3) "age"
+4) "38.001"
+5) "skill"
+6) "js html css"
+127.0.0.1:6379> Hlen handsomeboy
+(integer) 3
+```
+
+> HMget key feild [field ...]
+
+同时获取key对应的多个字段的值
+
+```bash
+127.0.0.1:6379> HMget handsomeboy name age
+1) "qqh"
+2) "38.001"
+127.0.0.1:6379> HgetAll handsomeboy
+1) "name"
+2) "qqh"
+3) "age"
+4) "38.001"
+5) "skill"
+6) "js html css"
+127.0.0.1:6379> 
+```
+
+> Hset key field value [field value ...]
+
+给指定的key 添加 字段和值
+
+```bash
+127.0.0.1:6379> HgetAll handsomeboy 
+1) "name"
+2) "qqh"
+3) "age"
+4) "38.001"
+5) "skill"
+6) "js html css"
+127.0.0.1:6379> Hset handsomeboy sex man
+(integer) 1
+127.0.0.1:6379> HgetAll handsomeboy 
+1) "name"
+2) "qqh"
+3) "age"
+4) "38.001"
+5) "skill"
+6) "js html css"
+7) "sex"
+8) "man"
+```
+
+
+> Hsetnx key field value [field value]
+
+只有在字段 field 不存在时，设置哈希表字段的值
+
+```bash
+127.0.0.1:6379> Hsetnx handsomeboy name 'qinqihan'
+(integer) 0 # 修改失败
+127.0.0.1:6379> HgetAll handsomeboy
+1) "name" # 因为那么字段存在
+2) "qqh"
+3) "age"
+4) "38.001"
+5) "skill"
+6) "js html css"
+7) "sex"
+8) "man"
+127.0.0.1:6379> Hsetnx handsomeboy facescore 1000 # facescore字段不存在
+(integer) 1 # 添加成功
+127.0.0.1:6379> HgetAll handsomeboy
+ 1) "name"
+ 2) "qqh"
+ 3) "age"
+ 4) "38.001"
+ 5) "skill"
+ 6) "js html css"
+ 7) "sex"
+ 8) "man"
+ 9) "facescore"
+10) "1000"
+```
+
+> Hvals key
+列出对应key所有的值，
+相当于js中的一个方法
+
+```js
+const handsomeboy = {
+    name: 'qqh',
+    sex: 'man',
+    age: 18,
+    skill: 'js html css'
+}
+
+Object.values(handsomeboy)
+```
+在redis中的实现方法
+
+```bash
+127.0.0.1:6379> HgetALL handsomeboy
+ 1) "name"
+ 2) "qqh"
+ 3) "age"
+ 4) "38.001"
+ 5) "skill"
+ 6) "js html css"
+ 7) "sex"
+ 8) "man"
+ 9) "facescore"
+10) "1000"
+127.0.0.1:6379> Hvals handsomeboy
+1) "qqh"
+2) "38.001"
+3) "js html css"
+4) "man"
+5) "1000"
+127.0.0.1:6379> 
+
+```
+
+> Hscan key cursor
+
+迭代对应hash
+
+
+
 
 
