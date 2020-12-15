@@ -1633,3 +1633,214 @@ Object.values(handsomeboy)
    2) "javascript"
 ```
 
+
+## 有序集合
+
+> Zadd key score member [score member]
+
+* 如果某个成员已经是有序集的成员，那么更新这个成员的分数值，并通过重新插入这个成员元素，来保证该成员在正确的位置上。
+
+* 分数值可以是整数值或双精度浮点数。
+
+* 如果有序集合 key 不存在，则创建一个空的有序集并执行 ZADD 操作。
+
+* 当 key 存在但不是有序集类型时，返回一个错误。
+
+
+```bash
+127.0.0.1:6379> Zrange zLeft 0 -1
+(empty array)
+127.0.0.1:6379> Zadd zLeft 3 c
+(integer) 1
+127.0.0.1:6379> Zadd zLeft 1 a
+(integer) 1
+127.0.0.1:6379> Zadd zLeft 2 b
+(integer) 1
+127.0.0.1:6379> Zrange Zleft 0 -1
+(empty array)
+127.0.0.1:6379> Zrange zLeft 0 -1
+1) "a"
+2) "b"
+3) "c"
+127.0.0.1:6379> Zadd zLeft 5 e
+(integer) 1
+127.0.0.1:6379> Zadd zLeft 6 f 4 d
+(integer) 2
+127.0.0.1:6379> Zrange zLeft 0 -1
+1) "a"
+2) "b"
+3) "c"
+4) "d"
+5) "e"
+6) "f"
+127.0.0.1:6379> Zadd zLeft 1 A 3 C
+(integer) 2
+127.0.0.1:6379> Zrange zLeft 0 -1
+1) "A"
+2) "a"
+3) "b"
+4) "C"
+5) "c"
+6) "d"
+7) "e"
+8) "f"
+127.0.0.1:6379> Zadd zLeft 7 G
+(integer) 1
+127.0.0.1:6379> Zrange zLeft 0 -1
+1) "A"
+2) "a"
+3) "b"
+4) "C"
+5) "c"
+6) "d"
+7) "e"
+8) "f"
+9) "G"
+127.0.0.1:6379> Zadd zLeft 7 g
+(integer) 1
+127.0.0.1:6379> Zrange zLeft 0 -1
+ 1) "A"
+ 2) "a"
+ 3) "b"
+ 4) "C"
+ 5) "c"
+ 6) "d"
+ 7) "e"
+ 8) "f"
+ 9) "G"
+10) "g"
+```
+
+> Zcard key
+
+获取指定的有序集合的成员**数**
+
+```bash
+127.0.0.1:6379> Zcard zLeft
+(integer) 10
+127.0.0.1:6379> Zrange zLeft 0 -1
+ 1) "A"
+ 2) "a"
+ 3) "b"
+ 4) "C"
+ 5) "c"
+ 6) "d"
+ 7) "e"
+ 8) "f"
+ 9) "G"
+10) "g"
+```
+
+> Zcount key min max
+
+* 计算有序集合中指定**分数区间**的成员数量
+* 返回给定分数区间的分数的数量
+
+```bash
+127.0.0.1:6379> Zadd zScore 1 a
+(integer) 1
+127.0.0.1:6379> Zadd zScore 2 b 2 B
+(integer) 2
+127.0.0.1:6379> Zadd zScore 2.55 bee 2.5 be
+(integer) 2
+127.0.0.1:6379> Zadd zScore 3.1 FFFFF
+(integer) 1
+127.0.0.1:6379> Zrange zScore 0 -1
+1) "a"
+2) "B"
+3) "b"
+4) "be"
+5) "bee"
+6) "FFFFF"
+127.0.0.1:6379> zCount zScore 1 3
+(integer) 5
+```
+
+
+> ZincrBy key 
+
+指定key的成员增加分数，增加的量为increment,返回增加后的score
+
+```bash
+127.0.0.1:6379> zAdd myset 1 a 2 b 3 c
+(integer) 3
+127.0.0.1:6379> zrange myset 0 -1
+1) "a"
+2) "b"
+3) "c"
+127.0.0.1:6379> zIncrBy myset 3 a
+"4"
+127.0.0.1:6379> zRange myset 0 -1
+1) "b"
+2) "c"
+3) "a"
+```
+
+> ZinterStore destination
+
+```bash
+# 新建有序左集合
+127.0.0.1:6379> zAdd zLeft 10 a 20 b 30 c 40 d
+(integer) 4
+# 新建有序右集合
+127.0.0.1:6379> zAdd zRight 20 a 30 b 40 c
+(integer) 3
+127.0.0.1:6379> zRange zLeft 0 -1 withscores
+1) "a"
+2) "10"
+3) "b"
+4) "20"
+5) "c"
+6) "30"
+7) "d"
+8) "40"
+127.0.0.1:6379> zRange zRight 0 -1 withscores
+1) "a"
+2) "20"
+3) "b"
+4) "30"
+5) "c"
+6) "40"
+# 计算交集
+127.0.0.1:6379> zInterStore zInter 2 zLeft zRight
+(integer) 3
+127.0.0.1:6379> zRange zInter 0 -1 withScores
+1) "a"
+2) "30"
+3) "b"
+4) "50"
+5) "c"
+6) "70"
+```
+
+
+
+> ZlexCount
+
+> Zrange
+
+> ZrangeByLex
+
+> ZrangeByScore
+
+> Zrank
+
+> Zrem
+
+> ZremRangeLex
+
+> ZremRangeByScore
+
+> ZrevRange
+
+> ZrevRangeByScore
+
+> ZrevRank
+
+> Zscore
+
+> ZunionStore
+
+> Zscan
+
+
