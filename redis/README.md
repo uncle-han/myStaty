@@ -1817,19 +1817,258 @@ Object.values(handsomeboy)
 
 > ZlexCount
 
+* 在有序集合中计算指定字典区间内成员数量
+* 返回区间指定的成员数
+
+```bash
+127.0.0.1:6379> zAdd zleft 0 a 0 b 
+(integer) 2
+127.0.0.1:6379> zAdd zleft 0 c 0 d 0 e 0 f
+(integer) 4
+127.0.0.1:6379> zRange zleft 0 -1 withscores
+ 1) "a"
+ 2) "0"
+ 3) "b"
+ 4) "0"
+ 5) "c"
+ 6) "0"
+ 7) "d"
+ 8) "0"
+ 9) "e"
+10) "0"
+11) "f"
+12) "0"
+127.0.0.1:6379> zlexCount zleft - +
+(integer) 6
+127.0.0.1:6379> zLexCount zleft [d [f
+(integer) 3
+```
+
 > Zrange
 
-> ZrangeByLex
+* 返回有序集合的指定区间的成员
+
+```bash
+127.0.0.1:6379> zAdd zMyset 0 a 1 b 3 d 2 c
+(integer) 4
+127.0.0.1:6379> zRange zMyset 0 -1
+1) "a"
+2) "b"
+3) "c"
+4) "d"
+127.0.0.1:6379> zRange zMyset 0 -1 withscores
+1) "a"
+2) "0"
+3) "b"
+4) "1"
+5) "c"
+6) "2"
+7) "d"
+8) "3"
+```
+
+> ZrangeByLex key 
+
+* 通过字典区间返回有序集合的成员
+
+```bash
+127.0.0.1:6379> zRange myset 0 -1 withscores
+ 1) "a"
+ 2) "0"
+ 3) "b"
+ 4) "1"
+ 5) "AB"
+ 6) "1.1100000000000001"
+ 7) "c"
+ 8) "2"
+ 9) "d"
+10) "3"
+11) "e"
+12) "4"
+#按字典序获取成员，列出包含b 到 包含 [d之间的成员
+127.0.0.1:6379> zRangeBylex myset [b [d
+1) "b"
+2) "AB"
+3) "c"
+4) "d"
+#按字典序获取成员，按升序列出有序集合的成员
+127.0.0.1:6379> zRangeBylex myset - +
+1) "a"
+2) "b"
+3) "AB"
+4) "c"
+5) "d"
+6) "e"
+#按字典序获取成员，从第一个成员到d,不包含d
+127.0.0.1:6379> zRangeByLex myset - (d
+1) "a"
+2) "b"
+3) "AB"
+4) "c"
+#按字典序获取成员，从第一个成员到c,包含c
+127.0.0.1:6379> zRangeByLex myset - [c
+1) "a"
+2) "b"
+3) "AB"
+4) "c"
+```
 
 > ZrangeByScore
 
+* 按分数罗列区间的成员
+
+```bash
+127.0.0.1:6379> zAdd myzset 0 a 1 b 2 c 3 d 
+(integer) 4
+127.0.0.1:6379> zAdd myzset 1.22 BB 2.95 CC 3.01 DD
+(integer) 3
+127.0.0.1:6379> zRange myzset 0 -1 withscores
+ 1) "a"
+ 2) "0"
+ 3) "b"
+ 4) "1"
+ 5) "BB"
+ 6) "1.22"
+ 7) "c"
+ 8) "2"
+ 9) "CC"
+10) "2.9500000000000002"
+11) "d"
+12) "3"
+13) "DD"
+14) "3.0099999999999998"
+127.0.0.1:6379> zRange myzset 1 3
+1) "b"
+2) "BB"
+3) "c"
+127.0.0.1:6379> zRangeByScore myzset 1 3
+1) "b"
+2) "BB"
+3) "c"
+4) "CC"
+5) "d"
+127.0.0.1:6379> zRange myzset 1 3 withscores
+1) "b"
+2) "1"
+3) "BB"
+4) "1.22"
+5) "c"
+6) "2"
+127.0.0.1:6379> zRangeByScore myzset 1 3 withscores
+ 1) "b"
+ 2) "1"
+ 3) "BB"
+ 4) "1.22"
+ 5) "c"
+ 6) "2"
+ 7) "CC"
+ 8) "2.9500000000000002"
+ 9) "d"
+10) "3"
+```
+
 > Zrank
 
-> Zrem
+* 查看指定成员在有序集合中的排名
+* 排名成0开始
+* 成员不在有序集合中，则返回nil
+
+```bash
+127.0.0.1:6379> zRange myzset 0 -1 withscores
+ 1) "a"
+ 2) "0"
+ 3) "b"
+ 4) "1"
+ 5) "BB"
+ 6) "1.22"
+ 7) "c"
+ 8) "2"
+ 9) "CC"
+10) "2.9500000000000002"
+11) "d"
+12) "3"
+13) "DD"
+14) "3.0099999999999998"
+127.0.0.1:6379> zRange myzset 0 -1
+1) "a"
+2) "b"
+3) "BB"
+4) "c"
+5) "CC"
+6) "d"
+7) "DD"
+127.0.0.1:6379> zrank myzset BB
+(integer) 2 # BB在排行榜第二
+127.0.0.1:6379> zrank myzset c
+(integer) 3 # c在排行榜第三
+127.0.0.1:6379> zrank myzset BBB
+(nil)
+```
+
+> Zrem key member [member ...]
+
+* 在指定有序集合中移除一个或多个成员
+* 返回移除的成员个数
+
+```bash
+127.0.0.1:6379> zrange myzset 0 -1
+1) "a"
+2) "b"
+3) "BB"
+4) "c"
+5) "CC"
+6) "d"
+7) "DD"
+127.0.0.1:6379> zrem myzset b
+(integer) 1
+127.0.0.1:6379> zrange myzset 0 -1
+1) "a"
+2) "BB"
+3) "c"
+4) "CC"
+5) "d"
+6) "DD"
+127.0.0.1:6379> zrem myzset d c
+(integer) 2
+127.0.0.1:6379> zrange myzset 0 -1
+1) "a"
+2) "BB"
+3) "CC"
+4) "DD"
+```
 
 > ZremRangeLex
 
+* 按**字典序**删除有序集合区间内的成员
+
+```bash
+127.0.0.1:6379> zrangeBylex lexset - +
+1) "a"
+2) "b"
+3) "c"
+4) "d"
+5) "e"
+6) "f"
+7) "g"
+# 删除字典序的有序集合的区间内的成员
+127.0.0.1:6379> zRemRangeByLex lexset [c [e
+(integer) 3 # 返回删除的个数
+127.0.0.1:6379> zRangeByLex lexset - +
+1) "a"
+2) "b"
+3) "f"
+4) "g"
+```
+
 > ZremRangeByScore
+
+* 按照**分数**删除有序集合的区间
+* 返回删除的个数
+
+```
+
+```
+
 
 > ZrevRange
 
