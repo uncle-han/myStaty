@@ -2253,5 +2253,154 @@ Object.values(handsomeboy)
    4) "5"
 ```
 
+## GEO 地理位置
 
+> geoadd key longitute latitude member [longitute latitude member ...]
+
+* 添加地理位置
+
+```bash
+# 添加广州到城市的集合，经度113.265 纬度23.108
+127.0.0.1:6379> geoadd city 113.265 23.108 guangzhou
+(integer) 1
+127.0.0.1:6379> geoadd city 108.295 22.838 nanning
+(integer) 1
+127.0.0.1:6379> geoadd city 116.408 39.904 beijing
+(integer) 1
+127.0.0.1:6379> geoadd city 114.279 30.573 wuhan
+(integer) 1
+127.0.0.1:6379> geoadd city 106.549 29.581 chongqing 121.445 31.213 shanghai
+(integer) 2
+```
+
+> geopos key member [member ...]
+
+* 通过指定位置名称查询对应的经度
+
+```bash
+127.0.0.1:6379> geopos city guangzhou
+1) 1) "113.26500087976455688"
+   2) "23.10799963305151294"
+```
+
+geodist key member1 member2 [m|km|mi|ft]
+
+* 查询两个位置的距离
+* m：米(默认)
+* km：千米
+* mi：英里
+* ft：英尺
+
+```
+127.0.0.1:6379> geodist city guangzhou nanning km
+"509.8121"
+127.0.0.1:6379> geodist city nanning beijing km
+"2046.2488"
+```
+
+> geoRadius key longirude latitude radius [m|km|ft|mi] [withcoord] [withdist] [withhash] [COUNT count] [asc|desc] [STORE key] [STOREDIST key]
+
+* 根据经度纬度查找距离当前
+
+```bash
+127.0.0.1:6379> georadius city 110 33 500 km
+1) "wuhan"
+127.0.0.1:6379> georadius city 120 43 1000 km
+1) "beijing"
+```
+
+> geoRadiusBymember key longirude latitude radius [m|km|ft|mi] [withcoord] [withdist] [withhash] [COUNT count] [asc|desc] [STORE key] [STOREDIST key]
+
+* 根据位置名称，查找指定半径内的成员
+
+```bash
+127.0.0.1:6379> georadiusByMember city wuhan 1000 km withcoord withdist
+1) 1) "guangzhou"
+   2) "836.3652"
+   3) 1) "113.26500087976455688"
+      2) "23.10799963305151294"
+2) 1) "wuhan"
+   2) "0.0000"
+   3) 1) "114.27899926900863647"
+      2) "30.57299931525717795"
+3) 1) "shanghai"
+   2) "687.5385"
+   3) 1) "121.44499808549880981"
+      2) "31.213001199663303"
+4) 1) "chongqing"
+   2) "751.9902"
+   3) 1) "106.54900163412094116"
+      2) "29.58100070345364685"
+127.0.0.1:6379> georadiusByMember city wuhan 1000 km withcoord withdist count 2
+1) 1) "wuhan"
+   2) "0.0000"
+   3) 1) "114.27899926900863647"
+      2) "30.57299931525717795"
+2) 1) "shanghai"
+   2) "687.5385"
+   3) 1) "121.44499808549880981"
+      2) "31.213001199663303"
+```
+
+### 集合的命令操作geo
+
+* 因为GOE底层是由set封装而成的
+
+> 查看所有的地理位置
+```bash
+ 1) "nanning"
+ 2) "4022430512005386"
+ 3) "chongqing"
+ 4) "4026059444815603"
+ 5) "guangzhou"
+ 6) "4046533668848872"
+ 7) "wuhan"
+ 8) "4052121270844835"
+ 9) "shanghai"
+10) "4054756185507317"
+11) "beijing"
+12) "4069885369376452"
+```
+
+> 移除位置信息
+
+```bash
+127.0.0.1:6379> zrange city 0 -1 withscores
+ 1) "nanning"
+ 2) "4022430512005386"
+ 3) "chongqing"
+ 4) "4026059444815603"
+ 5) "guangzhou"
+ 6) "4046533668848872"
+ 7) "wuhan"
+ 8) "4052121270844835"
+ 9) "shanghai"
+10) "4054756185507317"
+11) "beijing"
+12) "4069885369376452"
+127.0.0.1:6379> zrem city nanning
+(integer) 1
+127.0.0.1:6379> zrem city wuhan
+(integer) 1
+127.0.0.1:6379> zrange city 0 -1 withscores
+1) "chongqing"
+2) "4026059444815603"
+3) "guangzhou"
+4) "4046533668848872"
+5) "shanghai"
+6) "4054756185507317"
+7) "beijing"
+8) "4069885369376452"
+```
+
+> geohash city member [member ...]
+
+* 将二维的经度纬度转换成一维的字符串
+* 两个字符串越相似，地理位置就越近
+
+```bash
+127.0.0.1:6379> geohash city chongqing guangzhou
+1) "wm7b2949gd0"
+2) "ws0e3qtjcg0"
+```
 
