@@ -2346,6 +2346,11 @@ geodist key member1 member2 [m|km|mi|ft]
 
 * 因为GOE底层是由set封装而成的
 
+```bash
+127.0.0.1:6379> type city
+zset
+```
+
 > 查看所有的地理位置
 ```bash
  1) "nanning"
@@ -2402,5 +2407,54 @@ geodist key member1 member2 [m|km|mi|ft]
 127.0.0.1:6379> geohash city chongqing guangzhou
 1) "wm7b2949gd0"
 2) "ws0e3qtjcg0"
+```
+
+
+## hyperloglog
+
+```bash
+127.0.0.1:6379> type news3
+string
+```
+
+* 用来做基数统计的算法
+
+* 优点是，在输入元素的数量或者体积非常非常大时，计算基数所需的空间总是固定 的、并且是很小的。
+
+* 当数据很庞大的时候，会有误差
+
+* 如果做谋篇文章的浏览总数，视频观看总数的
+
+> PFadd key element
+
+* 添加元素
+
+```bash
+127.0.0.1:6379> PFadd news a b c d e f g h i
+(integer) 1
+127.0.0.1:6379> PFadd news2 c d r l a g j k
+(integer) 1
+```
+
+> PFcount key
+
+* 查看基数
+
+```
+127.0.0.1:6379> PFcount news
+(integer) 9
+127.0.0.1:6379> PFcount news2
+(integer) 8
+```
+
+> PFmerge distan sourcekey [sourcekey ]
+
+* 将一/多个的hyperloglog合并到目标的hyperloglog中
+
+```bash
+127.0.0.1:6379> PFmerge news3 news2 news
+OK
+127.0.0.1:6379> PFcount news3
+(integer) 13
 ```
 
