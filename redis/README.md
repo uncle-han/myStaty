@@ -2060,26 +2060,198 @@ Object.values(handsomeboy)
 4) "g"
 ```
 
-> ZremRangeByScore
+> ZremRangeByScore key min max
 
 * 按照**分数**删除有序集合的区间
 * 返回删除的个数
 
-```
-
+```bash
+127.0.0.1:6379> zAdd myscoreset 0 a 1 b 2 c 3 d
+(integer) 4
+127.0.0.1:6379> zAdd myscoreset 2.1 CC 1.99 BB
+(integer) 2
+127.0.0.1:6379> zrange myscoreset 0 -1 withscores
+ 1) "a"
+ 2) "0"
+ 3) "b"
+ 4) "1"
+ 5) "BB"
+ 6) "1.99"
+ 7) "c"
+ 8) "2"
+ 9) "CC"
+10) "2.1000000000000001"
+11) "d"
+12) "3"
+# 删除序号1 ~ 2的
+127.0.0.1:6379> zRemRangeByScore myscoreset 1 2
+(integer) 3 # 返回删除的个数
+127.0.0.1:6379> zrange myscoreset 0 -1 withscores
+1) "a"
+2) "0"
+3) "CC"
+4) "2.1000000000000001"
+5) "d"
+6) "3"
 ```
 
 
 > ZrevRange
 
-> ZrevRangeByScore
+* 按分数降序返回有序集合
+* 相同分数值的成员按字典序的逆序排列
+* 与zRange排序方式相反
+
+```bash
+# 升序列出指定有序集合的所有成员
+127.0.0.1:6379> zrange myscoreset 0 -1 withscores
+1) "a"
+2) "0"
+3) "CC"
+4) "2.1000000000000001"
+5) "d"
+6) "3"
+# 降序列出当前有序集合所有的成员
+127.0.0.1:6379> zRevRange myscoreset 0 -1 withscores
+1) "d"
+2) "3"
+3) "CC"
+4) "2.1000000000000001"
+5) "a"
+6) "0"
+```
+
+> ZrevRangeByScore key max min [withscores]
+
+* 返回有序集合指定区间内的成员，按分数降序
+
+```bash
+127.0.0.1:6379> zrevRangeByScore myscoreset - + 
+(error) ERR min or max is not a float
+127.0.0.1:6379> zrevRangeByScore myscoreset +inf -inf 
+1) "d"
+2) "CC"
+3) "a"
+127.0.0.1:6379> zrevRangeByScore myscoreset +inf -inf withscores
+1) "d"
+2) "3"
+3) "CC"
+4) "2.1000000000000001"
+5) "a"
+6) "0"
+127.0.0.1:6379> zrevRangeByScore myscoreset 2 0 withscores
+1) "a"
+2) "0"
+127.0.0.1:6379> zrevRangeByScore myscoreset 3 2 withscores
+1) "d"
+2) "3"
+3) "CC"
+4) "2.1000000000000001"
+```
 
 > ZrevRank
 
-> Zscore
+* 有序集成员按分数值递减(从大到小)排序。
+* 分数值最大的成员排名为 0
+* 相比较于zrank，获得到的是最小到大的排序
 
-> ZunionStore
+```bash
+127.0.0.1:6379> zAdd asw 1000 a 2000 b 3000 c 
+(integer) 3
+127.0.0.1:6379> zadd asw 4000 d 5000 e
+(integer) 2
+127.0.0.1:6379> zrevRange asw 0 -1 withscores
+ 1) "e"
+ 2) "5000"
+ 3) "d"
+ 4) "4000"
+ 5) "c"
+ 6) "3000"
+ 7) "b"
+ 8) "2000"
+ 9) "a"
+10) "1000"
+# 查看a的排名
+127.0.0.1:6379> zRevRank asw a
+(integer) 4
+# 查看e的排名
+127.0.0.1:6379> zRevRank asw e
+(integer) 0
+```
+
+> Zscore key member
+
+* 查看指定成员在有序集合中的分数
+
+```
+127.0.0.1:6379> zrange asw 0 -1 withscores
+ 1) "a"
+ 2) "1000"
+ 3) "b"
+ 4) "2000"
+ 5) "c"
+ 6) "3000"
+ 7) "d"
+ 8) "4000"
+ 9) "e"
+10) "5000"
+127.0.0.1:6379> zscore asw c
+"3000"
+```
+
+> ZunionStore destination key1 key2
+
+* 返回一/多个有序集合中的并集，并存在指定的集合中
+
+```bash
+127.0.0.1:6379> zadd left 1 a 2 b 3 c 4 d
+(integer) 4
+127.0.0.1:6379> zAdd right 3 c 4 d 5 e 6 f
+(integer) 4
+127.0.0.1:6379> zunionstore myunion 2 left right
+(integer) 6
+127.0.0.1:6379> zrange myunion 0 -1 withscores
+ 1) "a"
+ 2) "1"
+ 3) "b"
+ 4) "2"
+ 5) "e"
+ 6) "5"
+ 7) "c"
+ 8) "6"
+ 9) "f"
+10) "6"
+11) "d"
+12) "8"
+```
 
 > Zscan
+
+* 迭代有序集合
+
+```
+127.0.0.1:6379> zAdd websit 1 taobao 2 baidu 3 alibaba 4 tianmao 5 douyu 6 bilibili
+(integer) 6
+127.0.0.1:6379> zrange websit 0 -1 withscores
+ 1) "taobao"
+ 2) "1"
+ 3) "baidu"
+ 4) "2"
+ 5) "alibaba"
+ 6) "3"
+ 7) "tianmao"
+ 8) "4"
+ 9) "douyu"
+10) "5"
+11) "bilibili"
+12) "6"
+127.0.0.1:6379> zscan websit 0 match "*d*"
+1) "0"
+2) 1) "baidu"
+   2) "2"
+   3) "douyu"
+   4) "5"
+```
+
 
 
