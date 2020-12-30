@@ -72,7 +72,48 @@ cd nginx-1.12.0
 make && make install
 ```
 
-9. 启动,停止，重启nginx
+
+9. 开机启动nginx
+
+在rc.local增加启动代码
+
+```bash
+vi /etc/rc.local
+```
+增加一行 /usr/local/nginx/sbin/nginx
+
+修改执行权限
+
+```
+chmod 755 rc.local
+```
+
+## 开启防火墙。
+
+让外部电脑可以访问
+
+* 开启端口号80
+
+```bash
+[root@192 sbin]# firewall-cmd --permanent --zone=public --add-port=80/tcp --permanent
+```
+
+* 测试端口号有没有开启成功
+
+```bash
+[root@192 sbin]# firewall-cmd --permanent  --query-port=80/tcp --permanent
+```
+
+
+* 重启防火墙
+
+```
+firewall-cmd --reload
+```
+
+
+## 常用命令
+启动,停止，重启nginx
 
 查找安装完之后的nginx在那个目录
 ```
@@ -104,21 +145,6 @@ root      89924   9372  0 19:43 pts/0    00:00:00 grep --color=auto nginx
 * 重启nginx
 ```
 [root@192 sbin]# ./nginx -s reload
-```
-
-* 开机启动nginx
-
-在rc.local增加启动代码
-
-```bash
-vi /etc/rc.local
-```
-增加一行 /usr/local/nginx/sbin/nginx
-
-修改执行权限
-
-```
-chmod 755 rc.local
 ```
 
 
