@@ -2458,3 +2458,8 @@ OK
 (integer) 13
 ```
 
+
+## BitMaps
+
+
+

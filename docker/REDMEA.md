@@ -266,13 +266,13 @@ CMD /bin/bash
 ```
 
 ## CMD 和 ENTRYPOINT的区别案例
-```
+```bash
 FROM centos
 RUN yum -y install curl
 CMD ["curl", "-s", "http://ip.cn"]
 ```
 构建docker镜像
-```
+```bash
 docker build -f /mydocker/dockerfile2 -t myip .
 ```
 运行镜像, 会打印出HTML结果
