@@ -147,7 +147,96 @@ root      89924   9372  0 19:43 pts/0    00:00:00 grep --color=auto nginx
 [root@192 sbin]# ./nginx -s reload
 ```
 
+## nginx配置文件
 
 
 
+* 所在目录
+nginx安装目下`/usr/local/nginx/conf`
+
+<img src="./img/区域划分总览.png">
+
+### 全局快
+* 配置影响nginx全局的指令。
+* 一般有运行nginx服务器的用户组
+* nginx进程pid存放路径
+* 日志存放路径，配置文件引入
+* 允许生成worker process数等。
+
+### events块
+* 配置影响nginx服务器或与用户的网络连接。
+* 有每个进程的最大连接数，选取哪种事件驱动模型处理连接请求，是否允许同时接受多个网路连接，开启多个网络连接序列化等。
+
+### http块
+* 可以嵌套多个server，配置代理，缓存，日志定义等绝大多数功能和第三方模块的配置。
+
+* 如文件引入，mime-type定义，日志自定义，是否使用sendfile传输文件，连接超时时间，单连接请求数等。
+<img src="./img/http块.png">
+
+##### http server块
+* 配置虚拟主机的相关参数，一个http中可以有多个server。
+
+
+#### location 块
+* 配置请求的路由，以及各种页面的处理情况。
+
+<img src="./img/location块.png">
+
+## nginx配置实例 - 反向代理
+
+1. 实现效果
+打开浏览器，在浏览器地址栏输入地址，www.qinqihan.com 跳转到tomcat首页
+
+2. 准备工作
+> 配置hosts文件
+
+配置window系统下的hosts文件
+* 路径：`C:\Windows\System32\drivers\etc`
+* 配置上一下信息
+<img src="./img/hosts文件配置1.png">
+
+> 虚拟机下载tomcat
+
+```bash
+docker pull tomcat
+docker run -d -p 8080:8080 --name mytomcat tomcat
+```
+
+3. 配置nginx.conf配置文件
+
+```bash
+worker_processes  1;
+
+events {
+    worker_connections  1024;
+}
+
+http {
+    include       mime.types;
+    default_type  application/octet-stream;
+    sendfile        on;
+    keepalive_timeout  65;
+
+    server {
+        listen       80; # 端口号
+        server_name  192.168.196.133; # nginx 访问的ip
+
+        location / { # 当访问的路径为规则 / 
+            root   html;
+            proxy_pass http://127.0.0.1:8080; # 代理到该地址，该地址是映射在docker上的tomcat地址
+            index  index.html index.htm;
+        }
+    }
+}
+```
+
+4. 重新加载nginx
+去到nginx所在目录，`/usr/local/nginx/sbin`
+```
+./nginx -s reload
+```
+
+5. 测试
+
+<img src="./img/反向代理访问到tomcat，8080端口的.png">
 
