@@ -513,3 +513,62 @@ http {
     }
 }
 ```
+
+## 动静分离
+
+
+```bash
+worker_processes  1;
+
+events {
+    worker_connections  1024;
+}
+
+http {
+    include       mime.types;
+    default_type  application/octet-stream;
+    sendfile        on;
+
+    keepalive_timeout  65;
+
+    server {
+        listen       80;
+        server_name  l92.168.196.133;
+
+        location /haode/ { # 访问的路径有 /haode/ ，会做nginx在的服务器，根目录下，/static/寻找资源
+            root   /static/;
+            index  index.html index.htm;
+        }
+
+        location /images/ { # 访问的路径有 /images/， 会做nginx在的服务器，根目录下，/static/寻找资源
+            root  /static/;
+            autoindex on; # 列出路径下的目录
+        }
+}
+```
+
+* static的目录下的文件
+
+<img src="./img/static目录下的文件.png">
+
+* autoindex 配置的效果
+
+<img src="./img/autoindex.png">
+
+* 访问images目录相下的图片
+
+<img src="./img/动静分离 images下的图片.png">
+
+* 访问haode下的目录。直接定向到index.html
+
+<img src="./img/指向a html.png">
+
+* 访问haode下的目录。直接定向到index.html
+
+<img src="./img/haode.png">
+
+
+
+
+
+
