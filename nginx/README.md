@@ -240,3 +240,131 @@ http {
 
 <img src="./img/反向代理访问到tomcat，8080端口的.png">
 
+---
+### 根据url的路径转发到不同的端口号
+> 需求
+* 访问`www.qinqihan.com:999/qqh/a.html`是去到`8080`端口号的tomcat
+* 访问`www.qinqihan.com:999/cql/a.html`是去到`8081`端口号的tomcat
+
+> 准备工作
+
+1. 启动两个tomcat的docker容器
+
+```bash
+docker run -d -p 8080:8080 -v /tomcatDate:/data1 --name tomcat8080 tomcat
+docker run -d -p 8081:8080 -v /tomcatDate:/data1 --name tomcat8081 tomcat
+```
+
+2. 在真实机上创建一个html文件
+
+```
+cd /tomcatDate
+touch a.html
+vim a.html
+```
+
+3. 将以下的html代码复制进`a.html`文件里面
+
+```html
+<h1>8080!!!</h1>
+```
+
+4. 进入8080端口号的tomcat docker,配置一下文件
+
+```bash
+docker exec -it tomcat8080 /bin/bash
+# 现在这个版本的docker tomcat删除默认的webapps文件。重命名webapps.dist文件
+rm -rf webapps
+mv webapps.dist/ ./webapps
+cd webapps
+mkdir qqh
+cd qqh
+cp /tomcatDate/a.html /usr/local/tomcat/webapps/qqh/
+```
+`ctrl` + `p` + `q` 后台运行容器
+
+修改`a.html`文件
+
+```
+vim /tomcatDate/a.html
+```
+
+将以下的**a.html**的代码修改成以下
+
+```html
+<h1>8081!!!</h1>
+```
+
+
+5. 进入8081端口号的tomcat docker,配置一下文件
+
+```bash
+docker exec -it tomcat8080 /bin/bash
+# 现在这个版本的docker tomcat删除默认的webapps文件。重命名webapps.dist文件
+rm -rf webapps
+mv webapps.dist/ ./webapps
+cd webapps
+mkdir cql
+cd cql
+cp /tomcatDate/a.html /usr/local/tomcat/webapps/caql/
+```
+`ctrl` + `p` + `q` 后台运行容器
+
+6. 修改nginx配置
+
+```bash
+worker_processes  1;
+
+events {
+    worker_connections  1024;
+}
+
+http {
+    include       mime.types;
+    default_type  application/octet-stream;
+    sendfile        on;
+
+    server { # 当前端口号也可以访问到nginx
+        listen       80;
+        server_name  192.168.196.133;
+        location / {
+            root   html;
+            proxy_pass http://127.0.0.1:8080;
+            index  index.html index.htm;
+        }
+    }
+    
+    server { # 当前端口号也可以访问到nginx
+        listen       9999;
+        server_name  192.168.196.133; # 你当前nginx所在的服务器IP
+
+        location ~ /qqh/ { # 路径包含/qqh/(区分大小写)，跳转到下面端口号
+            root   html;
+			proxy_pass http://127.0.0.1:8080;
+            index  index.html index.htm;
+        }
+		location ~ /cql/ { # 路径包含/cql/(区分大小写)，跳转到下面端口号
+            root   html;
+			proxy_pass http://127.0.0.1:8081;
+            index  index.html index.htm;
+        }
+    }
+}
+```
+
+7. 重新加载nginx的配置文件
+
+```bash
+cd /usr/local/nginx/sbin/
+./nginx -s reload
+```
+
+8. 测试效果
+
+* 访问`www.qinqihan.com:999/qqh/a.html`
+
+<img src="./img/访问qqh路径.png">
+
+* 访问`www.qinqihan.com:999/cql/a.html`
+
+<img src="./img/访问cql路径.png">
