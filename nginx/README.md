@@ -368,3 +368,148 @@ cd /usr/local/nginx/sbin/
 * 访问`www.qinqihan.com:999/cql/a.html`
 
 <img src="./img/访问cql路径.png">
+
+## 负载均衡策略
+
+__需求__
+
+> 轮询(默认)策略
+
+访问**http://www.qinqihan.com/qqh/a.html**，`平均分配`请求到不同的tomcat的服务器，
+
+准备工作：
+* 准备两台tomcat的服务器
+* 防火墙开启对应的端口号
+* 配置如下文件`/usr/local/nginx/conf/nginx.conf`
+```bash
+worker_processes  1;
+
+events {
+    worker_connections  1024;
+}
+
+http {
+    include       mime.types;
+    default_type  application/octet-stream;
+    sendfile        on;
+    keepalive_timeout  65;
+    upstream myserver { # 定义轮询的目标服务器
+        server 192.168.196.133:8080;
+	    server 192.168.196.133:8081;
+    }
+
+    server {
+        listen       80;
+        server_name  192.168.196.133;
+        location ~ /qqh/ {
+	        proxy_pass http://myserver; # 使用定义的服务器
+        }
+    }
+}
+```
+* 重启nginx服务
+
+> 权重(weight)策略
+
+* 权重大的优先分配
+* 如有15个请求，有大概率的5个请求是去到8080，有大概率的10个请求是去到8081的
+
+具体配置如下
+
+```bash
+worker_processes  1;
+events {
+    worker_connections  1024;
+}
+http {
+    include       mime.types;
+    default_type  application/octet-stream;
+
+    sendfile        on;
+    keepalive_timeout  65;
+
+    upstream myserver { # 定义轮询的目标服务器
+        server 192.168.196.133:8080 weight = 5;
+	    server 192.168.196.133:8081 weight = 10;
+    }
+
+    server {
+        listen       80;
+        server_name  192.168.196.133;
+
+        location ~ /qqh/ {
+	        proxy_pass http://myserver; # 使用定义的服务器
+        }
+    }
+}
+```
+
+> ip hash
+
+* 当客户第一次访问，被分配到的服务器ip，下次访问，就一直是这个ip
+
+配置如下：
+
+```bash
+worker_processes  1;
+events {
+    worker_connections  1024;
+}
+http {
+    include       mime.types;
+    default_type  application/octet-stream;
+
+    sendfile        on;
+    keepalive_timeout  65;
+
+    upstream myserver {
+        ip_hash; # 启用ip hash的模式，给客户端分配服务器
+        server 192.168.196.133:8080;
+	    server 192.168.196.133:8081;
+    }
+
+    server {
+        listen       80;
+        server_name  192.168.196.133;
+
+        location ~ /qqh/ {
+	        proxy_pass http://myserver;
+        }
+    }
+}
+```
+
+> fair策略 (三方) 
+
+* 给客户端分配响应时间短的服务器
+
+配置如下：
+
+```bash
+worker_processes  1;
+events {
+    worker_connections  1024;
+}
+http {
+    include       mime.types;
+    default_type  application/octet-stream;
+
+    sendfile        on;
+    keepalive_timeout  65;
+
+    upstream myserver {
+        fair; # 启用fair模式，给客户端分配服务器
+        server 192.168.196.133:8080;
+	    server 192.168.196.133:8081;
+    }
+
+    server {
+        listen       80;
+        server_name  192.168.196.133;
+
+        location ~ /qqh/ {
+	        proxy_pass http://myserver;
+        }
+    }
+}
+```
