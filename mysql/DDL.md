@@ -823,3 +823,83 @@ GROUP BY e.department_id;
 <img src="./img/53.png">
 
 
+* 查询有奖金的每个部门的部门名和部门的领导编号和该部门的最低工资
+
+```sql
+SELECT 
+d.department_name , d.manager_id ,MIN(salary)
+from departments d , employees e
+where d.department_id = e.department_id
+AND commission_pct IS NOT NULL
+GROUP BY d.department_name , d.manager_id ;
+```
+
+<img src="./img/54.png">
+
+
+* 查询每个工种的工种名称和员工个数，并且按员工个数排序
+
+```sql
+SELECT 
+j.job_title, COUNT(*) 
+FROM employees e , jobs j 
+where j.job_id = e.job_id 
+GROUP BY j.job_title
+ORDER BY COUNT(*) DESC ;
+```
+
+<img src="./img/55.png">
+
+* 查询员工名，部门名和所在的城市
+
+```sql
+SELECT 
+	e.last_name ,d.department_name ,l.city 
+FROM 
+	employees e ,departments d ,locations l
+where
+	e.department_id = d.department_id 
+AND 
+	d.location_id = l.location_id ;
+```
+
+<img src="./img/56.png">
+
+### 非等值连接
+
+* 查询员工的姓名，工资，以及员工的工资级别
+
+```sql
+SELECT 
+	last_name , salary, jg.grade_level
+FROM 
+	employees e ,job_grades jg
+where 
+	e.salary BETWEEN jg.lowest_sal AND jg.highest_sal;
+```
+
+<img src="./img/57.png">
+
+### 自连接
+
+* 需求：查找员工名和对应的领导名
+
+<img src="./img/58.png">
+
+* 由上图分析
+    * 员工信息表中，查询pataballa的信息中，包含manager_id
+    * 而manager_id又是对应员工表中的employee_id
+    * 领导名，通过manager_id -> employee_id -> last_name
+
+```sql
+SELECT 
+	e.last_name, e.employee_id, m.last_name , m.manager_id 
+FROM 
+	employees e , employees m
+where
+	e.employee_id = m.manager_id;
+```
+
+<img src="./img/59.png">
+
+
