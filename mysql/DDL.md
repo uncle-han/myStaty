@@ -530,7 +530,7 @@ SELECT DATE_FORMAT(hireadate, '%m月/%d日 %y年') from employees;
 
 ## 其他函数
 
-### version(), datebase(), user();
+### version(), datebase(), user(); password(), md5()
 查询当前mysql的版本号
 ```sql
 select version();
@@ -548,7 +548,7 @@ select user();
 # root@192.168.196.1
 ```
 
-## 流程控制预计
+## 流程控制语句
 ### IF() 类似于js的 if eles 或者三元表达式
 ```sql
 select if(10 > 9, '大', '小');
@@ -734,7 +734,9 @@ ORDER by AVG(salary) DESC ;
 
 <img src="./img/47.png">
 
-# 连接查询
+
+# sql-92语法
+## 连接查询
 * 含义：又叫做连接查询，当查询的字段来自于多个表时，就会使用连接查询
 * 笛卡尔积：表一有n行，表二有m行，结果=m*n
 * 按功能分类：
@@ -901,5 +903,165 @@ where
 ```
 
 <img src="./img/59.png">
+
+# sql-99语法
+
+* 语法
+select 查询的字段名
+from 表名 别名 【连接类型】
+join 表名 别名
+on 连接条件
+【where 筛选条件】
+【group by 分组】
+【having 分组后的筛选条件】
+【order by 筛选条件】
+
+* 分类
+    * 内连接 inner
+    * 外连接
+        * 左连接 left 【outer】
+        * 右连接 right 【outer】
+        * 全外 full 【outer】
+
+* 交叉连接 cross 
+
+### 内连接 -> 等值连接
+
+* 语法
+selcet 表格字段
+from 表名1
+inner join 表名2
+where 连接条件
+
+* 查询员工名和部门名
+
+```sql
+92 语法
+SELECT 
+last_name , department_name
+FROM employees e , departments d 
+where e.department_id = d.department_id;
+
+99语法(内连接)
+
+SELECT 
+	last_name , d.department_name 
+FROM 
+	employees e
+inner join 
+	departments d
+no 
+	e.department_id = d.department_id;
+```
+
+<img src="./img/60.png">
+
+* 查询名字中包含e的员工名和工种名
+
+```sql
+SELECT e.last_name , j.job_title 
+FROM employees e
+inner join jobs j 
+ON e.job_id = j.job_id 
+WHERE e.last_name LIKE "%e%";
+```
+
+<img src="./img/61.png">
+
+* 查询部门个数 > 3 的城市名和部门个数
+
+```sql
+SELECT l.city , COUNT(*) 
+FROM locations l 
+inner join departments d 
+on l.location_id = d.location_id 
+GROUP BY d.location_id 
+HAVING COUNT(*) > 3;
+```
+
+<img src="./img/62.png">
+
+
+* 查询哪个部门的部门员工个数 > 3的部门名和员工个数，并按个数降序
+
+```sql
+SELECT d.department_name , COUNT(*) 
+FROM employees e 
+inner join departments d 
+on e.department_id = d.department_id 
+GROUP BY d.department_id 
+HAVING COUNT(*) > 3;
+```
+
+<img src="./img/63.png">
+
+* 查询员工名，部门名，工种名，并按部门名降序
+
+有n个表需要连接，就需要n-1个(inner join ... on)连接条件
+
+```sql
+SELECT e.last_name , d.department_name ,j.job_title 
+FROM employees e 
+inner join departments d  on e.department_id = d.department_id 
+inner join jobs j on  e.job_id = j.job_id
+ORDER BY d.department_name ;
+```
+
+<img src="./img/64.png">
+
+
+* 问题: 多表连接需要注意表的顺序吗？
+
+
+### 内连接 -> 非等值连接
+
+* 查询员工的工资级别
+
+```sql
+SELECT e.salary, g.grade_level 
+FROM employees e 
+inner JOIN job_grades g
+on e.salary BETWEEN g.lowest_sal AND g.highest_sal;
+```
+
+<img src="./img/65.png">
+
+* 查询工资级别的个数 > 2 个，并且按工资级别降序
+
+```sql
+SELECT g.grade_level, COUNT(*) 
+FROM employees e 
+inner JOIN job_grades g
+on e.salary BETWEEN g.lowest_sal AND g.highest_sal
+GROUP BY g.grade_level
+HAVING COUNT(*) > 20
+order BY COUNT(*) DESC ;
+```
+
+<img src="./img/66.png">
+
+### 内连接 -> 自连接
+
+* 查询员工的姓名和该员工的领导姓名。
+
+```sql
+SELECT e.last_name , e.employee_id , m.last_name leader , m.manager_id 
+FROM employees e 
+inner JOIN employees m
+on e.manager_id = m.employee_id ;
+```
+
+<img src="./img/67.png">
+
+
+
+
+
+
+
+
+
+
+
 
 
