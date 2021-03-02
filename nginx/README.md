@@ -559,11 +559,11 @@ http {
 
 <img src="./img/动静分离 images下的图片.png">
 
-* 访问haode下的目录。直接定向到index.html
+* 访问haode下的目录a.html。直接定向到a.html
 
 <img src="./img/指向a html.png">
 
-* 访问haode下的目录。直接定向到index.html
+* 访问haode下的目录,不指定文件名称。直接定向到index.html，是`index  index.html index.htm;`的作用
 
 <img src="./img/haode.png">
 

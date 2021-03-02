@@ -250,6 +250,11 @@ dockerfile体系结构(保留字指令)
 ---
 
 ### 对centos再次封装
+学习知识点
+* ENV 可以定义变量
+* WORKDIR 理解登录落脚点，docker run -it 进入容器的时候的路径，CMD 执行所在的目录
+* RUN 运行某个命令
+* 多个CMD只执行最后一个
 ```
 FROM centos
 MAINTAINER label<qinqihan163@163.com>
@@ -258,7 +263,7 @@ WORKDIR $MYPATH
 RUN yum -y install vim
 RUN yum -y install net-tools
 
-EXPOSE 80
+EXPOSE 80 # 暴露的端口
 
 CMD echo $MYPATH
 CMD echo "success--------------------ok"
@@ -299,9 +304,19 @@ ENTRYPOINT curl -s https://www.ip.cn/
 
 ## docker build 
 将dockerFile构建成镜像
+
 ```
-docker build -f /path/to/dockerfile/ -t newContainername .
+docker build -f /path/to/dockerfile/ -t newContainerName .
 ```
 
+
+## docker commit
+
+提交成一个新的镜像(裹多一层千层饼)
+
+ * -a, --author string    Author (e.g., "John Hannibal Smith <hannibal@a-team.* com>") 作者
+ *  -c, --change list      Apply Dockerfile instruction to the created image 
+ *  -m, --message string   Commit message 提交信息
+ *  -p, --pause            Pause container during commit (default true)
 
 
