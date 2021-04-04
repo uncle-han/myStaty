@@ -9,6 +9,10 @@ _roadhog-api-doc
 
 # production
 /dist
+/**/*/dist
+/**/dist
+/*/dist
+dist
 /.vscode
 
 # misc
