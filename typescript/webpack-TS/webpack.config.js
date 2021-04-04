@@ -8,6 +8,10 @@ module.exports = {
   output: {
     path: path.resolve(__dirname, "dist"),
     filename: "js/index.js",
+    clean: true,
+    environment: {
+      arrowFunction: false,
+    }
   },
   module: {
     rules: [
@@ -18,15 +22,19 @@ module.exports = {
           {
             loader: 'babel-loader',
             options: {
+              cacheDirectory: true,
               presets: [
-                '@babel/preset-env',
-                {
-                  targets: { // 兼容的目标浏览器
-                    chrome: '80',
-                  },
-                  'corejs': '3', // 当前corejs使用的版本
-                  useBuiltIns: 'usage'
-                }
+                [
+                  '@babel/preset-env',
+                  {
+                    targets: { // 兼容的目标浏览器
+                      chrome: '80',
+                      ie: '11',
+                    },
+                    'corejs': '3', // 当前corejs使用的版本
+                    useBuiltIns: 'usage' // 按需加载core-js
+                  }
+                ]
               ]
             }
           },
@@ -48,6 +56,6 @@ module.exports = {
   new CleanWebpackPlugin()
 ],
   resolve: {
-    extensions: ['.ts', '.wasm', '.mjs', '.js', '.json'],
+    extensions: ['.ts', '.js', '.json'],
   }
 };
