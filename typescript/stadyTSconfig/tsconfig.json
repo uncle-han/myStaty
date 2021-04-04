@@ -1,0 +1,24 @@
+{
+    "include": [
+        "./src/**/*"
+    ],
+    /*
+        /** 任意目录下的文件夹
+        /*  任意目录下的文件
+    */
+    "exclude": [
+        "node_modules",
+        "./src/disable/**/*"
+    ],
+    "compilerOptions": {
+        "allowJs": true,
+        "checkJs": true,
+        // "declaration": true,
+        // "declarationDir": "./decl/",
+        // "diagnostics": true,
+        "target": "ES6",
+        "outDir": "./dist/",
+        "outFile": "./dist/index.js",
+        "strict": true,
+    }
+}
