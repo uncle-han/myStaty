@@ -12,7 +12,6 @@
 
   ```bash
   nohup /path/to/your/fprc -c-c /path/to/your/frpc.ini
-  
   ```
 
 ## 使用systemctl来控制启动
