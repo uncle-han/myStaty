@@ -1,17 +1,35 @@
 # frps启动方式(frpc参照下面的启动)
 
+
+
+## 下载
+
+[下载地址](https://github.com/fatedier/frp/releases)
+
+```bash
+cd /usr/local
+wget https://github.com/fatedier/frp/releases/download/v0.36.2/frp_0.36.2_linux_amd64.tar.gz
+```
+
+##  安装
+
+```bash
+tar -xzvf frp_0.36.2_linux_amd64.tar.gz
+mv frp_0.36.2_linux_amd64/ ./frpc
+```
+
 ## 使用nohup来启动
 
 * 这是frps的后台启动（路径写你服务器上的绝对路径），如果要查看日志的话，就直接使用`cat nohup.out`，就可以查看了。
 
   ```bash
-  nohup /path/to/your/fprs -c-c /path/to/your/frps.ini
+  nohup /path/to/your/fprs -c /path/to/your/frps.ini
   ```
 
 * 这是frpc的后台启动
 
   ```bash
-  nohup /path/to/your/fprc -c-c /path/to/your/frpc.ini
+  nohup /path/to/your/fprc -c /path/to/your/frpc.ini
   ```
 
 ## 使用systemctl来控制启动

@@ -14,6 +14,7 @@ _roadhog-api-doc
 /*/dist
 dist
 /.vscode
+*.wmv
 
 # misc
 .DS_Store
@@ -44,3 +45,4 @@ screenshot
 
 build
 english/2020全民英文背诵/
+git_dome_store

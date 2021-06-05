@@ -16,7 +16,7 @@ docker images mysql
 
 ## 运行镜像
 ```
-docker run -p 3306:3306 --name sutdymysql -v /mydocker/conf/mysql.conf:/etc/mysql/conf.d -v /mydocker/logs/mysqllogs:/logs -v /mydocker/data/mysqldata:/var/lib/mysql -e MYSQL_ROOT_PASSWORD=root -d mysql
+docker run -p 3306:3306 --name sutdymysql -v /dockerWork/mysql/conf/mysql.conf:/etc/mysql/conf.d -v /dockerWork/mysql/logs/mysqllogs:/logs -v /dockerWork/mysql/data/mysqldata:/var/lib/mysql -e MYSQL_ROOT_PASSWORD=root -d mysql
 ```
 * -d 后台启动
 * -p 3306:3306

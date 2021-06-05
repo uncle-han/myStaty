@@ -1,9 +1,9 @@
 const path = require("path");
-const HtmlWebpackPlugin = require('html-webpack-plugin');
-const { CleanWebpackPlugin } = require('clean-webpack-plugin');
+const HtmlWebpackPlugin = require("html-webpack-plugin");
+const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 
 module.exports = {
-  mode: 'production',
+  mode: "development",
   entry: "./src/main.ts",
   output: {
     path: path.resolve(__dirname, "dist"),
@@ -11,7 +11,7 @@ module.exports = {
     clean: true,
     environment: {
       arrowFunction: false,
-    }
+    },
   },
   module: {
     rules: [
@@ -20,25 +20,26 @@ module.exports = {
         exclude: /node_modules/,
         use: [
           {
-            loader: 'babel-loader',
+            loader: "babel-loader",
             options: {
               cacheDirectory: true,
               presets: [
                 [
-                  '@babel/preset-env',
+                  "@babel/preset-env",
                   {
-                    targets: { // 兼容的目标浏览器
-                      chrome: '80',
-                      ie: '11',
+                    targets: {
+                      // 兼容的目标浏览器
+                      chrome: "80",
+                      ie: "11",
                     },
-                    'corejs': '3', // 当前corejs使用的版本
-                    useBuiltIns: 'usage' // 按需加载core-js
-                  }
-                ]
-              ]
-            }
+                    corejs: "3", // 当前corejs使用的版本
+                    useBuiltIns: "usage", // 按需加载core-js
+                  },
+                ],
+              ],
+            },
           },
-          "ts-loader"
+          "ts-loader",
         ],
       },
     ],
@@ -51,11 +52,12 @@ module.exports = {
   },
   plugins: [
     new HtmlWebpackPlugin({
-    template: './src/index.html',
-  }),
-  new CleanWebpackPlugin()
-],
+      template: "./src/index.html",
+    }),
+    new CleanWebpackPlugin(),
+  ],
   resolve: {
-    extensions: ['.ts', '.js', '.json'],
-  }
+    extensions: [".ts", ".js", ".json"],
+  },
+  devtool: 'eval'
 };
