@@ -9,7 +9,7 @@ import React from 'react';
 
 // import store from './store/index';
 
-import Pages from './pages/read-wirte-separation/index'
+import Pages from './pages/read-wirte-separation/index1'
 
 function App() {
   return (
