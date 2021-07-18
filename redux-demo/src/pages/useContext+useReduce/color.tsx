@@ -4,8 +4,10 @@ type InitValue = {
   color: string;
 };
 
+export const a = 1;
 interface ReduserInterface {
   state: InitValue;
+  a?: '123',
 }
 
 interface ActionInyerface {}

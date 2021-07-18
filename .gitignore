@@ -7,6 +7,8 @@
 /src/utils/request-temp.js
 _roadhog-api-doc
 
+**/ps/素材
+
 # production
 /dist
 /**/*/dist
