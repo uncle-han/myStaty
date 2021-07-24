@@ -302,19 +302,20 @@ ENTRYPOINT curl -s https://www.ip.cn/
 
 `ENTRYPOINT`不会覆盖原来的命令，只会追加在里面
 
-## docker build 
+## docker build
 将dockerFile构建成镜像
 
 ```
 docker build -f /path/to/dockerfile/ -t newContainerName .
 ```
 
+**注意后面有一个`.`,表示当前执行build的上下文**
 
 ## docker commit
 
 提交成一个新的镜像(裹多一层千层饼)
 
- * -a, --author string    Author (e.g., "John Hannibal Smith <hannibal@a-team.* com>") 作者
+ *  -a, --author string    Author (e.g., "John Hannibal Smith <hannibal@a-team.* com>") 作者
  *  -c, --change list      Apply Dockerfile instruction to the created image 
  *  -m, --message string   Commit message 提交信息
  *  -p, --pause            Pause container during commit (default true)
