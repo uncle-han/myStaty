@@ -14,5 +14,3 @@ export const getValue = () => {
 export const isDefined = () => {
     return obj['name']
 }
-
-
