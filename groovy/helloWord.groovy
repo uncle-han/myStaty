@@ -1,6 +1,4 @@
-int v = 0;
+def h = 'hello word';
 
-v = new Date()
-
-println v
+println h
 
