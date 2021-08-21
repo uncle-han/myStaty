@@ -151,3 +151,73 @@ expect(mockFunc.mock.calls).toEqual([[arg1, arg2]]);
 expect(mockFunc.getMockName()).toBe('a mock name');
 ```
 
+
+# 快照测试 snapshot test
+
+* 原理：有快照匹配器的时候，会按照生成的第一次生成的结果去创建快照文件，第二次执行的时候，运行的时候，和快照里面的内容对比，如果不变(或者符合特定逻辑)，测试通过，如果和存在快照里面的不同，测试就不通过
+
+```js
+// index.js
+export const config = () => {
+    return {
+        host: '127.0.0.1',
+        port: '80'
+    }
+}
+```
+
+* 没有运行快照之前的目录
+
+<img src="./img/4.png">
+
+* 执行下面的代码，测试快照
+
+```js
+// index.test.js
+import {
+    config
+} from './index';
+
+test('test config by snapshot', () => {
+    // 第一次执行，生成快照，第二次执行，测试结果和快照对比
+    expect(config()).toMatchSnapshot()
+})
+```
+
+* 运行快照之后的目录,生成了
+
+<img src="./img/3.png">
+
+* ```__snapshots__\index.test.js.snap```文件
+
+```
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`test config by snapshot 1`] = `
+Object {
+  "host": "127.0.0.1",
+  "port": "80",
+}
+`;
+```
+
+* 尝试修改一个文件
+
+看到前后修改的内容对比，如果确认当前的修改，按`u`，覆盖快照
+
+<img src="./img/5.png">
+
+* 重新生成，会覆盖快照
+
+```
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`test config by snapshot 1`] = `
+Object {
+  "host": "127.0.0.1",
+  "port": "8080",
+}
+`;
+```
+
+
