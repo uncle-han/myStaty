@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <script>
+        function downloadFile(fileName, content) {
+            var a = document.createElement('a');
+            var blob = new Blob([content]);
+            a.download = fileName;
+            a.href = URL.createObjectURL(blob);
+            a.style.display = 'none';
+            a.innerHTML = '点击下载';
+            document.body.appendChild(a)
+            a.click();
+            URL.revokeObjectURL(blob);
+            // navigator.msSaveOrOpenBlob(blob, fileName); // 兼容ie 11
+        }
+
+        downloadFile('a.txt', '111222333')
+
+        /*
+            // 兼容ie 9及一下
+            var frame = document.createElement("iframe");
+            if ( frame ) {
+                frame.setAttribute("style", "display:none");
+                frame.contentDocument.open("txt/html", "replace");
+                frame.contentDocument.write(data); // data 是 string 类型
+                frame.contentDocument.close();
+                document.body.appendChild(frame);
+                frame.focus();
+                frame.contentDocument.execCommand("SaveAs", true, filename);
+                document.body.removeChild(frame);
+            }
+        */
+
+    </script>
+</body>
+</html>
