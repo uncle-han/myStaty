@@ -1,0 +1,31 @@
+body {
+    margin: 0;
+    width: 800px;
+    height: 400px;
+}
+
+#wrap {
+    box-sizing: content-box;
+    height: 100%;
+    width: 100%;
+    padding: 10px;
+}
+
+#contenain {
+    overflow: auto;
+}
+
+.functionBox {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.functionBox a {
+    width: fit-content;
+    margin-right: 10px;
+}
+
+.functionBox .functionTitle {
+    width: 100%;
+}
+

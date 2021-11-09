@@ -1,0 +1,24 @@
+{
+  "manifest_version": 2,
+  "name": "清清兔",
+  "description": "兔兔学习 chrome extension",
+  "version": "1.0",
+  "minimum_chrome_version": "10.0",
+  "icons": {
+    "16": "./src/img/icon.png",
+    "48": "./src/img/rabitHear.png",
+    "128": "./src/img/icon.png"
+  },
+  "browser_action": {
+    "default_icon": "./src/img/rabitEat.png",
+    "default_popup": "./src/popup.html",
+    "default_title ": "qing qing tu"
+  },
+  "background": {
+    "page": "src/backgroundPage.html"
+  },
+  "permissions": ["http://*/*", "https://*/*", "*://*/*", "contextMenus"],
+  "chrome_url_overrides": {
+    "newtab": "src/newTab.html"
+  }
+}
