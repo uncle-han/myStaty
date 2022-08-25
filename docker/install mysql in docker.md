@@ -16,13 +16,13 @@ docker images mysql
 
 ## 运行镜像
 ```
-docker run -p 3306:3306 --name sutdymysql -v /dockerWork/mysql/conf/mysql.conf:/etc/mysql/conf.d -v /dockerWork/mysql/logs/mysqllogs:/logs -v /dockerWork/mysql/data/mysqldata:/var/lib/mysql -e MYSQL_ROOT_PASSWORD=root -d mysql
+docker run -p 3306:3306 --name studymysql -v /dockerWork/mysql/conf/mysql.conf:/etc/mysql/conf.d -v /dockerWork/mysql/logs/mysqllogs:/logs -v /dockerWork/mysql/data/mysqldata:/var/lib/mysql -e MYSQL_ROOT_PASSWORD=root -d mysql
 ```
 * -d 后台启动
 * -p 3306:3306
     * 主机上的3306端口号对应docker容器的3306mysql数据库的端口号
-* --name sutdymysql
-    * 生成的容器名称：sutdymysql
+* --name studymysql
+    * 生成的容器名称：studymysql
 * 指定volume
     * /mydocker/conf/mysql.conf:/etc/mysql/conf.d
     * /mydocker/logs/mysqllogs:/logs
@@ -34,7 +34,7 @@ docker run -p 3306:3306 --name sutdymysql -v /dockerWork/mysql/conf/mysql.conf:/
 解决方案：
 进入容器：
 ```
-docker exec -it 62349aa31687 /bin/bash
+docker exec -it studymysql /bin/bash
 ```
 
 进入mysql：
