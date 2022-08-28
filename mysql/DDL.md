@@ -164,9 +164,11 @@ SELECT * FROM employees where salary > 5000;
 SELECT last_name, department_id FROM employees where department_id != 13;
 ```
 <img src="./img/13.png">
+
 ```sql
 SELECT last_name, department_id FROM employees where department_id <> 13;
 ```
+
 <img src="./img/14.png">
 
 ### 逻辑运算的运用
@@ -491,7 +493,7 @@ SELECT YEAR(now()); # 2020
 SELECT YEAR("1999-1-1 20:59:59"); # 1999
 SELECT MONTH("1999-1-1 20:59:59"); # 1
 SELECT MONTHNAME(NOW()); # November
-SELECT DAYOFMONTH("1999-1-2 20:59:58");
+SELECT DAYOFMONTH("1999-1-2 20:59:58"); # 2
 SELECT DAY("1999-1-1 20:59:59"); # 1
 ```
 
@@ -626,6 +628,11 @@ from employees;
 函数有：sum(), max(), min(), avg(), count()
 特点：
 * sum, avg() 一般只处理数字型，min, max, count 可以任何类型
+    * sum可以理解需要相加，取总和数，而数字可以求和，其他不可以
+    * avg只有数字可以相加求平均值，其他不行
+    * max可以将字段排序再取最大值，字符和日期都是可以排序的
+    * min可以将字段排序再取最小值，字符和日期都是可以排序的
+    * count任何字段可以被数
 * 以上的分组忽略null的值
 * 可以和`distinct`搭配实现去重的运算
 * 和分组函数一同查询的字段要求是`group by`后的字段  
@@ -638,6 +645,7 @@ from 表名
 [where 条件]
 group by 分组的列表
 [order by 列名]
+[having 被分组的条件 ] 
 ```
 *  案列：查询每个部门的平均工资
 
@@ -654,6 +662,16 @@ group by department_id;
 select count(*), location_id from departments group by location_id
 ```
 <img src="./img/40.png">
+
+* distinc 在分组函数里面的去重
+
+```sql
+# 查询员工里面有多少种工资类型
+SELECT count(distinct salary) FROM employees;
+```
+
+<img src="./img/68.jpg">
+
 
 ### 在分组条件下，添加条件筛选
 * 邮箱中包含a字符的，每个部门的平均工资
@@ -672,6 +690,15 @@ group by department_id
 HAVING count(*)>2;
 ```
 <img src="./img/42.png">
+
+* 查询每个工种的最高工资
+
+```sql
+SELECT MAX(salary), job_id from employees GROUP BY job_id;
+```
+
+<img src="./img/69.png">
+
 
 * 查询每个工种有奖金的员工的最高工资 > 12000
 
@@ -702,6 +729,8 @@ HAVING MIN(salary) > 5000;
 ### 按表达式或函数分组
 
 * 按员工姓名长度分组，查询每一组的员工的员工个数，筛选员工个数>5的有哪些
+
+`count(*)`计算表中数据的行数 
 
 ```sql
 SELECT COUNT(*) c, LENGTH(CONCAT(last_name, first_name)) as len 
@@ -735,7 +764,31 @@ ORDER by AVG(salary) DESC ;
 <img src="./img/47.png">
 
 
-# sql-92语法
+* 按照姓名长度分组, 查询不同姓名长度的个数，且姓名长度大于5的
+
+```sql
+SELECT count(*), LENGTH(last_name) lastNameLength
+FROM employees
+GROUP BY lastNameLength
+HAVING lastNameLength > 5;
+```
+
+<img src="./img/70.png">
+
+
+### 多个字段分组
+* 查询每个部门每个工种的员工的平均工资
+
+```sql
+SELECT AVG(salary), department_id, job_id
+FROM employees
+GROUP BY job_id, department_id;
+```
+
+<img src="./img/71.png">
+
+# 表连接
+## sql-92语法
 ## 连接查询
 * 含义：又叫做连接查询，当查询的字段来自于多个表时，就会使用连接查询
 * 笛卡尔积：表一有n行，表二有m行，结果=m*n
@@ -828,7 +881,7 @@ GROUP BY e.department_id;
 * 查询有奖金的每个部门的部门名和部门的领导编号和该部门的最低工资
 
 ```sql
-SELECT 
+SELECT
 d.department_name , d.manager_id ,MIN(salary)
 from departments d , employees e
 where d.department_id = e.department_id
