@@ -970,7 +970,7 @@ on 连接条件
 【order by 筛选条件】
 
 * 分类
-    * 内连接 inner
+    * 内连接 \[inner\] join (可以省略 inner)
     * 外连接
         * 左连接 left 【outer】
         * 右连接 right 【outer】
@@ -989,6 +989,7 @@ where 连接条件
 * 查询员工名和部门名
 
 ```sql
+
 92 语法
 SELECT 
 last_name , department_name
@@ -1106,12 +1107,36 @@ on e.manager_id = m.employee_id ;
 
 <img src="./img/67.png">
 
+## 外连接
+* 应用场景：用于查询一个表中有，另外一个表中没有的记录
+    特点：
+    1. 外连接的查询结果为主表的所有数据
+        * 如果从表中有和他匹配的值。则显示匹配的值
+        * 如果从表中没有和他匹配的值，则显示null
+        * 外连接查询结果=内连接结果+主表中有而从表没有的记录
+    2. 左外连接，left join左边的是主表。右外连接，right join右边的是主表
+    3. 左外和右外交换两个表的顺序，可以实现相同的效果
 
 
+### 左外连接
+* 查询女神表中男朋友的信息不在男神表里面的女神名
 
+```sql
+SELECT b.*, be.name, be.boyfriend_id
+FROM boys b
+left outer join beauty be
+on b.id = be.boyfriend_id;
+```
 
+右外连接
+* 查询男神表在女神表中没有信息的男神名
 
-
+```sql
+SELECT b.*, be.name, be.boyfriend_id
+FROM beauty be
+right outer join boys b
+on b.id = be.boyfriend_id;
+```
 
 
 
