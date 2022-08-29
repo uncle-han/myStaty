@@ -1138,8 +1138,90 @@ right outer join boys b
 on b.id = be.boyfriend_id;
 ```
 
+# 子查询
+1. 出现在其他语句中的select 语句，称为子查询和内查询
+外部的查询语句，称为主查询或外查询
+分类
+1. 子查询出现查询出现的位置
+    * select后面
+        * 仅仅支持标量子查询
+    * from后面：
+        * 支持表查询
+    * where后面
+        * 标量子查询
+        * 列子查询
+        * 行子查询
+    * exists后面(相关子查询)
+        表子查询
+2. 按照结果的行数和列数不同
+    * 标量子查询(结果集一行一列)
+    * 列子查询(结果集只有一列多行)
+    * 行子查询(结果集只有一行多列)
+    * 表查询(结果集是多行多列)
+
+* 查询工资比Greenberg高的员工名和工资
+    *  查询Greenberg的工资
+
+```sql
+SELECT salary from employees where last_name = 'Greenberg';
+```
+
+<img src="./img/72.png" />
+
+* 将查询的结果作为判断条件
+
+```sql
+SELECT last_name, salary
+FROM employees
+WHERE salary > (SELECT salary from employees where last_name = 'Greenberg');
+```
+
+<img src="./img/73.png">
 
 
+* 返回job_id与141号员工相同， salary 比143号员工多的员工姓名job_id
+```sql
+# 结果1： 返回job_id与141号员工相同
+SELECT job_id FROM employees WHERE employee_id = 141;
+```
+
+<img src="./img/74.png" />
+
+```sql
+# 结果2： 143号员工的salary
+SELECT salary from employees WHERE employee_id = 143;
+```
+
+<img src="./img/75.png">
 
 
+```sql
+# job_id和1相同，且工资比结果2大的员工姓名，job_id, salary
+SELECT last_name, job_id, salary
+FROM employees
+WHERE 
+job_id = (SELECT job_id FROM employees WHERE employee_id = 141)
+AND
+salary > (SELECT salary from employees WHERE employee_id = 143);
+```
+
+<img src="./img/76.png">
+
+* 返回公司最少工资的员工的last_name, job_id 和 salary
+
+```sql
+# 先找到公司里面工资最少的条件
+SELECT MIN(salary) FROM employees;
+```
+<img src="./img/77.png">
+
+
+```sql
+# 将最小工资作为条件。查询对应的员工名，job_id, salary
+SELECT last_name, job_id, salary
+FROM employees
+WHERE salary = (SELECT MIN(salary) FROM employees);
+```
+
+<img src="./img/78.png">
 
