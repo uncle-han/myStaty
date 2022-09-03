@@ -1162,6 +1162,8 @@ on b.id = be.boyfriend_id;
 * 查询工资比Greenberg高的员工名和工资
     *  查询Greenberg的工资
 
+### 标量子查询
+
 ```sql
 SELECT salary from employees where last_name = 'Greenberg';
 ```
@@ -1224,4 +1226,168 @@ WHERE salary = (SELECT MIN(salary) FROM employees);
 ```
 
 <img src="./img/78.png">
+
+* 查询最低工资大于50号部门最低工资的部门id和其最低工资
+
+```sql
+# 查询50号部门的最低工资
+SELECT MIN(salary) FROM employees WHERE department_id = 50;
+
+```
+
+<img src="./img/79.png">
+
+```sql
+# 查询每个部门的工资，且工资比50号部门的最低工资高
+SELECT MIN(salary) min_salary, department_id
+FROM employees
+GROUP BY department_id
+HAVING min_salary > (SELECT MIN(salary) FROM employees WHERE department_id = 50);
+```
+
+<img src="./img/80.png">
+
+
+### 列子查询(多行子查询)
+
+|操作符|含义|
+|---|---|
+|IN / NOT IN |等于列表中的任意一个|
+|ANY / SOME|和子查询返回的某个值比较|
+|ALL|和子查询返回的所有值比较|
+
+* 返回location_id是1400或1700的部门的所有员工姓名
+
+```sql
+# 查询 location_id是1400或1700有的部门
+SELECT DISTINCT department_id FROM departments WHERE location_id in (1400, 1700);
+```
+
+<img src="./img/81.png">
+
+```sql
+# 返回location_id是1400或1700的部门的所有员工姓名
+# 查询 location_id是1400或1700有的部门
+SELECT DISTINCT department_id FROM departments WHERE location_id in (1400, 1700);
+
+# 查询 员工的姓名 在上述查询到的部门中
+SELECT last_name
+FROM employees
+WHERE department_id in (SELECT DISTINCT department_id FROM departments WHERE location_id in (1400, 1700));
+```
+
+<img src="./img/82.png">
+
+* 返回其他部门中比job_id为IT_PROG部门任一工资低的员工的工号、姓名、job_id已经salary
+
+```sql
+# 查询job_id为IT_PROG的工资
+SELECT salary FROM employees WHERE job_id = 'IT_PROG';
+```
+
+<img src="./img/83.png">
+
+```sql
+# 查询job_id有IT_PROG的部门
+SELECT DISTINCT department_id FROM employees WHERE job_id = 'IT_PROG';
+```
+
+<img src="./img/84.png">
+
+```sql
+
+SELECT employee_id, last_name, job_id, salary
+FROM employees
+WHERE department_id not in (SELECT DISTINCT department_id FROM employees WHERE job_id = 'IT_PROG')
+AND salary < any (SELECT salary FROM employees WHERE job_id = 'IT_PROG');
+```
+
+<img src="./img/85.png">
+
+```sql
+# any 比任意一个都小
+# 一定比最大的还小，改写用 max找出最大值
+
+SELECT employee_id, last_name, job_id, salary
+FROM employees
+WHERE department_id not in (SELECT DISTINCT department_id FROM employees WHERE job_id = 'IT_PROG')
+AND salary < (SELECT MAX(salary) FROM employees WHERE job_id = 'IT_PROG');
+```
+
+<img src="./img/86.png">
+
+### 在select后面的子查询
+
+* 查询每个部门的员工个数
+
+分析
+1. 不能根据employee来查询，因为有些部门不一定有员工
+2. 应该跟部门(deparment)表查询, 每一个部门在员工表里有没有
+
+
+```sql
+SELECT COUNT(*), department_id
+FROM employees
+GROUP BY department_id;
+```
+
+<img src="./img/87.png">
+
+
+```sql
+SELECT d.* , (
+	SELECT IFNULL(COUNT(*),0)
+	FROM employees e
+	where d.department_id = e.department_id
+	GROUP BY e.department_id # 也可以不使用分组查询
+) 个数 FROM departments d;
+```
+
+<img src="./img/88.png">
+
+* 查询员工号=102的部门名
+
+```sql
+SELECT department_name from employees e, departments d
+WHERE e.department_id = d.department_id and e.employee_id = 102;
+```
+
+<img src="./img/89.png">
+
+```sql
+SELECT (
+	SELECT department_name FROM departments d
+	INNER JOIN employees e
+	ON e.department_id = d.department_id
+	WHERE e.employee_id = 102
+) 部门名;
+```
+
+<img src="./img/90.png">
+
+### 在from后面使用
+* 查询每个部门的平均工资的等级
+
+```sql
+SELECT AVG(salary) avg_sa, department_id
+FROM employees
+GROUP BY department_id
+```
+<img src="./img/91.png">
+
+* 分析
+1. 查询每个部门的平均工资
+2. 查询到的平均工资和工资等级表连接
+3. 筛选出每个部门的平均，处于对应区间工资的等级
+
+```sql
+SELECT jg.grade_level, avg_salary_t.avg_sa, avg_salary_t.department_id
+FROM (
+	SELECT AVG(salary) avg_sa, department_id
+	FROM employees
+	GROUP BY department_id
+) avg_salary_t,
+	job_grades jg
+WHERE avg_salary_t.avg_sa BETWEEN jg.lowest_sal AND jg.highest_sal;
+```
 
