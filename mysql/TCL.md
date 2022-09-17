@@ -187,6 +187,10 @@ note: 如果是全局级别的，则需要加global,如果是会话级别，则�
 ```sql
 show global | session variables;
 ```
+
+<img src="./img/100.png">
+
+
 2. 查看满足条件的部分系统变量
 ```sql
 show global | \[session\] variabels like '%name%'
@@ -195,17 +199,561 @@ show global | \[session\] variabels like '%name%'
 ```sql
 select @@global | [session].系统变量名
 ```
+
+```sql
+SELECT @@transaction_isolation;
+```
+
+<img src="./img/101.png">
+
+
 4. 为某个系统变量赋值
     * 方式一：
 ```sql
 set global | [session] 系统变量名 = 值;
-e.g: set autocommit=0;
+```
+
+```sql
+set autocommit=0
 ```
 
    * 方式二
 
 ```sql
 set global | [session].系统变量名=值
+```
+
+> 自定义变量
+作用域：针对当前会话(连接)有效，同于会话变量的作用域
+
+赋值的操作符： =或:=
+1. 声明并初始化
+    * SET @用户变量名 = 值
+    * SET @用户变量名 := 值
+    * select @用户变量名 := 值
+2. 赋值操作
+    * 方式一
+        * SET @用户变量名 = 值
+        * SET @用户变量名 := 值
+        * select @用户变量名 := 值
+    * 方式二
+        * 通过select into
+            * select 字段名 into @变量名 from 表格
+
+
+```sql
+set @name='覃淇韩'; # 声明
+```
+
+<img src="./img/102.png">
+
+```sql
+select @name;
+```
+
+<img src="./img/103.png">
+
+```sql
+set @name='qqh'; # 修改值
+```
+
+<img src="./img/104.png">
+
+
+```sql
+select @name; # 查看修改的值
+```
+
+<img src="./img/105.png">
+
+
+* 通过查询语句给变量赋值
+
+```sql
+SELECT count(*) INTO @number FROM employees;
+```
+
+<img src="./img/106.png">
+
+```sql
+SELECT @number;
+```
+
+
+<img src="./img/107.png">
+
+> 局部变量
+
+作用域： 仅在定义的begin end 中有效
+
+1. 声明
+    * declare 变量名 类型 值
+    * declare 变量名 类型 defaultVal 值
+2. 赋值
+    * SET 变量名 = 值
+    * SET 变量名 := 值
+    * select @变量名 := 值
+    * 通过select into
+        * select 字段名 into 变量名 from 表格
+
+
+
+## 存储过程和函数
+
+* 存储过程
+    * 好处：
+        1. 提高代码的重用性
+        2. 简化操作
+* 存储过程
+    * 含义: 一组预先编译好的SQL语句集合，理解成批处理语句
+        1. 提高代码的重用性
+        2. 简化操作
+        3. 减少了编译次数并且减少了和数据库服务器的连接次数，提高效率
+
+> 创建语法
+
+```sql
+create procedure 存储过程名 (参数列表)
+begin
+    # 存储过程体 (一组合法的SQL语句)
+end
+```
+
+注意
+1. 参数列表包含三部分
+    * 参数模式 参数名 参数类型
+    * 举例: IN studentName varchar(20)
+    * 参数模式:
+        * IN: 该参数作为输入，也就是改参数需要调用方传入值
+        * OUT：该参数做为输出值，也就是该参数可以做返回值
+        * INOUT: 该参数作为输入也可以作为输出， 也就是该参数需要传入值，也可以返回值
+
+2. 如果存储过程体仅仅只有一句话。 `begin end` 可以省略
+3. 存储过程中的每条SQL 语句的结束要求必须加分号。
+4. 存储过程的结尾可以使用 DELIMITER 重新设置
+语法： 
+DELIMITER 结束符号
+
+> 调用
+
+```sql
+CALL 存储过程名(参数列表);
+```
+
+> 空参列表
+
+
+1. 插入五条数据
+
+```SQL
+DELIMITER ! # 声明 重新设置 符号
+CREATE PROCEDURE myp1()
+BEGIN
+	INSERT INTO admin(username,`password`) VALUES('qqh1', '1'),
+	('qqh2', '2'),('qqh3', '3'),('qqh4', '4'),('qqh5', '5');
+END !;
+```
+
+上面的语句需要在终端terminal运行一下, 结果如下；
+
+<img src="./img/109.png">
+
+
+在navicat里查对应的数据库.会看到有对应的函数名生成
+
+<img src="./img/108.png">
+
+
+调用自定义函数
+
+```sql
+CALL myp1();
+```
+
+<img src="./img/111.png">
+
+查看通过存储过程插入的数据
+
+```sql
+SELECT * FROM admin;
+```
+
+<img src="./img/112.png">
+
+
+* 根据女神名查询对应的男神名
+
+```sql
+CREATE PROCEDURE myp2(IN girlName VARCHAR(20))
+BEGIN
+	SELECT boyName FROM boys bo
+	INNER JOIN beauty be
+	ON be.boyfriend_id = bo.id
+	WHERE girlName = be.`name`;
+END !;
+```
+
+<img src="./img/113.png">
+
+<img src="./img/114.png">
+
+执行
+
+```sql
+CALL myp2('热巴');
+```
+
+<img src="./img/115.png">
+
+
+```sql
+CREATE PROCEDURE p_verify_user_name_and_password1(IN userName VARCHAR(20), IN password VARCHAR(20))
+BEGIN
+	DECLARE result INT;
+	SELECT COUNT(*) INTO result FROM admin a
+	WHERE userName = a.username AND `password`=a.`password`;
+	SELECT if(result > 0, 'verify successful!', 'access denied') verifyResult;
+END; # 这里没使用定义的 重新设置符号
+```
+
+在终端terminal执行
+
+<img src="./img/116.png">
+
+调用存储过程函数
+
+```sql
+CALL p_verify_user_name_and_password1('john', '8888');
+```
+
+<img src="./img/117.png">
+
+```sql
+CALL p_verify_user_name_and_password1('john', '8');
+```
+
+<img src="./img/118.png">
+
+> OUT的模式参数类型
+
+* 根据女神名返回对应的男神名
+```sql
+CREATE PROCEDURE p_by_beautyName_get_boName (IN BeautyName VARCHAR(20), OUT BoyName VARCHAR(20))
+BEGIN
+	SELECT bo.boyName INTO BoyName
+	FROM boys bo
+	INNER JOIN beauty be
+	ON bo.id = be.boyfriend_id
+	WHERE BeautyName = be.`name`;
+END;
+```
+编译注册存储过程函数
+<img src="./img/120.png">
+
+```sql
+SET @bName1 = '';
+CALL p_by_beautyName_get_boName('赵敏', @bName1);
+```
+
+<img src="./img/119.png">
+
+查看放回值
+
+```sql
+SELECT @bName1;
+```
+
+<img src="./img/121.png">
+
+
+
+> INOUT的模式参数类型
+
+* 传入a和b两个值，最终a和b都翻倍并返回
+
+```sql
+CREATE PROCEDURE doubleIncrement(INOUT A INT, INOUT B INT)
+BEGIN
+	SELECT A * 2, B * 2 INTO A, B;
+END;
+
+SET @a = 2;
+SET @b = 3;
+CALL doubleIncrement(@a, @b);
+select @a, @b;
+```
+
+编译注册存储过程函数
+<img src="./img/123.png">
+
+声明变量，调用存储过程函数
+
+<img src="./img/124.png">
+
+查看返回值
+
+<img src="./img/125.png">
+
+
+> 查看存储过程
+
+```sql
+SHOW CREATE PROCEDURE doubleIncrement;
+```
+
+<img src="./img/126.png">
+
+> 删除存储过程
+
+```sql
+DROP PROCEDURE doubleIncrement;
+```
+
+### 函数
+
+* 好处：
+    1. 提高代码的重用性
+    2. 简化操作
+* 含义: 一组预先编译好的SQL语句集合，理解成批处理语句
+    1. 提高代码的重用性
+    2. 简化操作
+    3. 减少了编译次数并且减少了和数据库服务器的连接次数，提高效率
+
+* 区别：
+    * 存储过程：可以有0个返回，也可以有多个返回，合适批量插入，批量更新
+    * 函数： 有且仅有1一个返回。适合做处理数据后返回一个结果
+
+
+* 语法
+```sql
+CREATE FUNCTION 函数名(参数列表) RETURNS 返回类型
+BEGIN
+	函数体
+END;
+```
+
+* 注意
+    1. 参数列表分成两部分: 参数名 参数类型
+
+    2. 函数体：肯定会有return语句，如果没有会报错
+        * 如果return语句没有放在函数体的最后也不报错，但不建议
+    3. return值:
+        * 函数体中仅有一句话，则可以省略begin end
+        * 使用 delimiter 语句结束标记
+
+
+如果创建不成功，出现下面的语句
+you *might* want to use the less safe log_bin_trust_function_creators variable)
+可以尝试以下方法关闭掉检查
+```sql
+SET GLOBAL log_bin_trust_function_creators = 1;
+```
+
+
+
+```sql
+CREATE FUNCTION employeeCount() RETURNS INT
+BEGIN
+	DECLARE c INT DEFAULT 0;
+	SELECT COUNT(*) INTO c FROM employees;
+	RETURN c;
+END ;
+
+
+```
+编译注册函数
+
+<img src="./img/127.png">
+
+执行函数
+
+```sql
+SELECT employeeCount();
+```
+
+* 根据员工名返回工资
+
+```sql
+CREATE FUNCTION by_lastNamge_get_salary(l_name VARCHAR(20)) RETURNS DOUBLE
+BEGIN
+	DECLARE s DOUBLE;
+	SELECT salary INTO s FROM employees WHERE last_name = l_name;
+	RETURN s;
+END;
+
+SELECT by_lastNamge_get_salary('Kaufling');
+```
+
+<img src="./img/129.png">
+
+* 根据部门id，返回该部门的平均工资
+
+```sql
+CREATE FUNCTION by_deparimentId_get_avgSalary (departmentId VARCHAR(20)) RETURNS DOUBLE
+BEGIN
+	SET @avgSalary = 0;
+	SELECT avg(salary) INTO @avgSalary FROM employees
+	WHERE department_id = departmentId
+	GROUP BY departmentId;
+	RETURN @avgSalary;
+END;
+```
+
+编译执行之后，调用函数进行查询
+
+```sql
+SELECT by_deparimentId_get_avgSalary(90);
+```
+
+<img src="./img/130.png">
+
+```sql
+SELECT by_deparimentId_get_avgSalary(100);
+```
+
+<img src="./img/131.png">
+
+> 查看函数
+
+sql 查看
+
+```sql
+show create function by_deparimentId_get_avgSalary;
+```
+
+<img src="./img/132.png"/>
+
+在可视化工具里面查看
+
+<img src="./img/133.png">
+
+点击查看对应的sql函数。我这里选择查看了 __by_deparimentId_get_avgSalary__ 函数, 查看函数的完整的定义
+
+<img src="./img/134.png">
+
+
+> 删除函数
+
+```sql
+drop create function by_deparimentId_get_avgSalary;
+```
+
+创建存储过程, 根据传入的成绩，来显示等级，比如传入的成绩：
+* 90-100 A
+* 80-90 B
+* 60-80 C
+* 其他是 D
+
+```sql
+CREATE FUNCTION getScoreGrade(score DOUBLE) RETURNS CHAR
+BEGIN
+	CASE
+		WHEN score >= 90 or score <= 100 THEN RETURN 'A';
+		WHEN score >= 80 or score < 90 THEN RETURN 'B';
+		WHEN score >= 60 OR score < 80 THEN RETURN 'C';
+		ELSE RETURN 'D';
+	END CASE;
+END;
+
+SELECT getScoreGrade(91);
+```
+
+<img src="./img/135.png">
+
+> ## 循环 while loop repeat
+循环控制:
+* iterate 类似于 continue, 继续结束当前循环，继续一下一次
+* leave 类似于break， 跳出，结束当前所在的循环
+
+1. while
+语法：
+```sql
+    [tag:] while 循环条件 do
+        循环体
+    end while [tag];
+```
+
+联想js:
+
+```js
+while(condition) {
+    // do anything
+}
+```
+
+2. loop
+实现死循环，需要用 leave 关键字跳出循环
+语法
+
+```sql
+    [tag:] loop
+        循环体
+    end loop [tag];
+```
+
+
+
+3. repeat
+
+
+语法
+
+```sql 
+    [tag:] repeat
+        循环体
+    until 结束循环的条件
+    end repeat [tag];
+```
+
+
+* 插入n条数据到admin表格
+
+```sql
+CREATE PROCEDURE muiltInsert(IN c INT)
+BEGIN
+	DECLARE n INT DEFAULT 0;
+	WHILE n < c DO
+		INSERT INTO admin(username, `password`) VALUES('qqh', n);
+		SET n = n + 1;
+	END WHILE;
+
+END;
+```
+
+* 插入n条数据到admin表格，当个数大于20的时候，停止插入
+
+```SQL
+CREATE PROCEDURE muiltInsert(IN c INT)
+BEGIN
+	DECLARE i INT DEFAULT 0;
+	label: LOOP
+		INSERT INTO admin(username, `password`) VALUES('qqh', i);
+   	SET i = i + 1;
+	IF i > 20 THEN
+		LEAVE label; 
+	END IF; 
+END LOOP label;
+
+END;
+
+CALL muiltInsert(25);
+```
+
+* 插入n条数据到admin表格，当个数大于20的时候，停止插入
+
+模拟js的 **continue** 的方式
+
+```sql
+CREATE PROCEDURE insetByMod(IN c INT)
+BEGIN
+	DECLARE i INT DEFAULT 0;
+	label: REPEAT
+		IF MOD(i,2) = 0 THEN ITERATE label; 
+		END IF;
+INSERT INTO admin(username, `password`) VALUES('qqh', c);
+SET i = i + 1;
+UNTIL i >= c END REPEAT label;
+END; 
 ```
 
 
