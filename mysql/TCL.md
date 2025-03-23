@@ -193,7 +193,7 @@ show global | session variables;
 
 2. 查看满足条件的部分系统变量
 ```sql
-show global | \[session\] variabels like '%name%'
+show global | [session] variabels like '%name%'
 ```
 3. 查看指定的某个系统变量的值
 ```sql
@@ -364,7 +364,7 @@ END !;
 <img src="./img/108.png">
 
 
-调用自定义函数
+调用自定义存储过程
 
 ```sql
 CALL myp1();
@@ -509,7 +509,7 @@ SHOW CREATE PROCEDURE doubleIncrement;
 DROP PROCEDURE doubleIncrement;
 ```
 
-### 函数
+## 函数
 
 * 好处：
     1. 提高代码的重用性
